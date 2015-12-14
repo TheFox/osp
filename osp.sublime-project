@@ -1,0 +1,10 @@
+{
+	"folders":[
+		{
+			"path": ".",
+			"name": "OneShallPass",
+			"folder_exclude_patterns": [ ],
+			"file_exclude_patterns": [ ]
+		}
+	]
+}

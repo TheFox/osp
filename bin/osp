@@ -1,0 +1,384 @@
+#!/usr/bin/env ruby
+# coding: UTF-8
+
+raise 'Ruby >=2.1 required' unless RUBY_VERSION >= '2.1.0'
+
+require 'optparse'
+require 'fileutils'
+#require 'securerandom'
+#require 'openssl'
+#require 'base64'
+# require 'yaml/store'
+require 'pp'
+
+require 'bundler/setup'
+#require 'highline/import'
+require 'highline'
+require 'rainbow'
+require 'msgpack'
+require 'osp'
+
+#msg = [1,2,3].to_msgpack
+#MessagePack.unpack(msg)
+
+
+options = {
+	:database_path => "#{Dir.home}/.osp",
+}
+opts = OptionParser.new do |opts|
+	opts.banner = 'Usage: osp'
+	opts.separator('')
+	
+	opts.on('-d', '--database <path>', 'Path to the database file.') do |path|
+		options[:database_path] = path
+	end
+	
+	opts.on_tail('-h', '--help', 'Show this message.') do
+		puts opts
+		puts
+		exit 3
+	end
+end
+#ARGV << '-h' if ARGV.count == 0
+args = opts.parse(ARGV)
+
+
+@cli = HighLine.new
+
+puts "OSP - OneShallPass #{TheFox::OSP::VERSION}"
+puts TheFox::OSP::HOMEPAGE
+puts
+
+puts 'Master Login'
+
+# email    = @cli.ask('   Email: ')
+puts '   Email: xyz@example.com'
+# password = @cli.ask('Password: '){ |q| q.echo = '*' }
+puts 'Password: xyz'
+
+Console.cursor_jump_to_column
+Console.cursor_up(2)
+Console.screen_clear_to_bottom
+
+puts '   Email: *****'
+puts 'Password: *****'
+puts
+
+email = 'xyz@example.com'
+password = 'xyz'
+
+database = {
+	'meta' => {
+		'version' => 1,
+		'created_at' => DateTime.now.to_s,
+		'updated_at' => DateTime.now.to_s,
+	},
+	'hosts' => {}
+}
+has_database = false
+has_database_changes = false
+if File.exist?(options[:database_path])
+	puts "Found database file: #{options[:database_path]}",
+		'Try to open it ...'
+	
+	begin
+		database = MessagePack.unpack(File.binread(options[:database_path]))
+		database['hosts'] = database['hosts'].map{ |name, host| [name, TheFox::OSP::Host.from_h(host)] }.to_h
+	rescue Exception => e
+		puts "FATAL ERROR: couldn't open database:"
+		puts "'#{e}'"
+		
+		exit
+	end
+end
+
+printf "Calculating base hash: #{TheFox::OSP::HASHES_N} (#{TheFox::OSP::HASHES_EXP}-bit) - please wait ..."
+
+osp = TheFox::OSP::OSP.new(email, password, TheFox::OSP::HASHES_N)
+osp.key_derivation
+puts ' done'
+
+database['hosts'].each{ |name, host| host.osp = osp }
+
+def password_callback_method(step, pw)
+	printf '.'
+end
+osp.password_callback_method = self.method('password_callback_method')
+
+def host_show(host, regenerate_password = false)
+	if !host.has_generated_password? || regenerate_password
+		print 'Generate password '
+		host.generate_password(regenerate_password)
+		puts ' done'
+	end
+	
+	puts
+	puts "      Name: #{host.name}"
+	puts "Generation: #{host.generation}"
+	puts "    Length: #{host.length}"
+	puts "   Symbols: #{host.symbols}"
+	puts "    Hashes: #{host.hashes}"
+	puts "  Password: #{host.password}"
+end
+
+def host_edit(osp, host = nil)
+	host = TheFox::OSP::Host.new(osp) if host.nil?
+	
+	tmp = @cli.ask('      Name: ' + (!host.name.nil? ? "[#{host.name}]" : '') + ' ').strip.to_s
+	# puts "name: '#{tmp}' #{tmp.class}"
+	
+	host.name = tmp if tmp != ''
+	# puts "name: '#{host.name}' #{host.name.class}"
+	
+	host.name = nil if host.name == ''
+	# puts "name: '#{host.name}' #{host.name.class}"
+	
+	if host.name.nil?
+		# puts "No host input."
+		return nil
+	end
+	
+	host.generation = @cli.ask("Generation: [#{host.generation}] ", Integer){ |q|
+		q.default = host.generation
+		q.in = 1..99 }.to_i
+	
+	host.length     = @cli.ask("    Length: [#{host.length}] ", Integer){ |q|
+		q.default = host.length
+		q.in = TheFox::OSP::PASSWORD_MIN_SIZE..TheFox::OSP::PASSWORD_MAX_SIZE }.to_i
+	
+	host.symbols    = @cli.ask("   Symbols: [#{host.symbols}] ", Integer){ |q|
+		q.default = host.symbols
+		q.in = 0..3 }.to_i
+	
+	host.updated_at = DateTime.now
+	
+	host
+end
+
+actions = ['begin']
+while true
+	case actions.pop
+	when 'begin'
+		puts
+		puts "Type '?' for help."
+	when 'n'
+		puts
+		host = host_edit(osp)
+		if !host.nil?
+			host_show(host)
+			puts
+			
+			add = @cli.ask('Add to database? [yN] ', String){ |q| q.character = true }.strip.downcase
+			add = 'n' if add == ''
+			puts "Answer: '#{add}'"
+			
+			if add == 'y'
+				has_database_changes = true
+				
+				database['hosts'][host.name] = host
+			end
+		else
+			puts "ERROR: hostname can't be nothing."
+		end
+	when 'l'
+		puts
+		puts 'List Hosts'
+		puts
+		
+		hosts_n = database['hosts'].count
+		format = '%' + hosts_n.to_s.length.to_s + 'd'
+		
+		# puts "format: '#{format}'"
+		
+		n = 0
+		database['hosts'].values.each do |host|
+			n += 1
+			# pp host
+			printf "#{format}. %s\n", n, host.name
+		end
+	when 's'
+		found_hosts = []
+		
+		search_actions = ['begin']
+		while true
+			case search_actions.pop
+			when 'begin'
+				puts
+				puts 'Entering search submenu.'
+				
+				search_actions << 's'
+			when 's'
+				puts
+				
+				host_name = @cli.ask('Search host names: ', String).strip.downcase
+				re = Regexp.new(host_name, Regexp::IGNORECASE)
+				
+				found_hosts = database['hosts'].select{ |name, host| re.match(host.name) }
+				
+				search_actions << 'l'
+			when 'l'
+				puts
+				if found_hosts.count > 0
+					puts "#{found_hosts.count} host(s) found:"
+					
+					hosts_n = found_hosts.count
+					format = '%' + hosts_n.to_s.length.to_s + 'd'
+					n = 0
+					found_hosts.each do |name, host|
+						n += 1
+						printf "#{format}. %s\n", n, host.name
+					end
+				else
+					puts 'No hosts found.'
+				end
+			when 'i'
+				puts
+				if found_hosts.count > 0
+					index = @cli.ask('Show host, select by number: ', Integer){ |q|
+						q.character = true if found_hosts.count < 10
+						q.in = 1..(found_hosts.count) }.to_i
+					
+					puts
+					puts "Host ##{index} selected:"
+					index -= 1
+					selected_host = nil
+					begin
+						selected_host = found_hosts.values[index]
+					rescue Exception => e
+						puts "ERROR: #{e}"
+					end
+					
+					if !selected_host.nil?
+						host_show(selected_host)
+					end
+				else
+					puts 'No hosts found.'
+				end
+			when 'e'
+				puts
+				if found_hosts.count > 0
+					index = @cli.ask('Edit, select host by number: ', Integer){ |q|
+						q.character = true if found_hosts.count < 10
+						q.in = 1..(found_hosts.count) }.to_i
+					
+					puts
+					puts "Host ##{index} selected:"
+					index -= 1
+					selected_host = nil
+					begin
+						selected_host = found_hosts.values[index].clone
+					rescue Exception => e
+						puts "ERROR: #{e}"
+					end
+					
+					if !selected_host.nil?
+						host_edit(osp, selected_host)
+						host_show(selected_host)
+						
+						database['hosts'][selected_host.name] = selected_host
+						
+						has_database_changes = true
+					end
+				else
+					puts 'No hosts found.'
+				end
+			# when 'd'
+			# 	puts
+			# 	if found_hosts.count > 0
+			# 		puts 'Delete'
+			# 		puts
+			# 	else
+			# 		puts 'No hosts found.'
+			# 	end
+			when 'q'
+				break
+			when '?'
+				puts
+				puts 'Search-menu help:'
+				puts "\ts - New search."
+				puts "\tl - List found hosts."
+				puts "\ti - Print informations about a host found by a search."
+				puts "\te - Edit a host found by search."
+				# puts "\td - Delete a host found by search."
+				puts "\tq - Quit search."
+				puts "\t? - Print help."
+			else
+				puts "WARNING: invalid input. Type '?' for help."
+			end
+			
+			next if search_actions.count > 0
+			
+			puts
+			search_actions << @cli.ask('[slieq?] >> '){ |q| q.character = true }.downcase
+		end
+	when 'x'
+		actions << 'q'
+		actions << 'w'
+	when 'w'
+		if has_database_changes
+			tmp = "#{options[:database_path]}~"
+			backup = "#{options[:database_path]}~backup"
+			
+			database['meta']['updated_at'] = DateTime.now.to_s
+			
+			if File.exist?(options[:database_path])
+				puts "Backup old file to        '#{backup}'."
+				FileUtils.mv(options[:database_path], backup)
+			end
+			
+			puts "Write temp file to        '#{tmp}'."
+			db_c = database.clone
+			db_c['hosts'] = db_c['hosts'].map{ |name, host| [name, host.to_h] }.to_h
+			File.binwrite(tmp, db_c.to_msgpack)
+			
+			puts "Finally move temp file to '#{options[:database_path]}'."
+			FileUtils.mv(tmp, options[:database_path])
+			
+			has_database_changes = false
+		else
+			puts 'Nothing changed, nothing written.'
+		end
+	when 'q'
+		if has_database_changes
+			puts
+			puts 'You have unsaved database changes.'
+			
+			save = @cli.ask('Would you like to save the database? [Yn] ', String){ |q| q.character = true }.strip.downcase
+			save = 'y' if save == ''
+			puts "Answer: '#{save}'"
+			
+			if save == 'y'
+				actions << 'x'
+			else
+				really = @cli.ask('Really? [yN] ', String){ |q| q.character = true }.strip.downcase
+				really = 'y' if really == ''
+				puts "Answer: '#{really}'"
+				
+				if really == 'y'
+					has_database_changes = false
+					actions << 'q'
+				end
+			end
+		else
+			puts 'Quit.'
+			break
+		end
+	when '?'
+		puts
+		puts 'Main-menu help:'
+		puts "\tn - New password."
+		puts "\tl - List hosts from database."
+		puts "\ts - Search submenu."
+		puts "\tx - Same as wq."
+		puts "\tw - Write database to file."
+		puts "\tq - Quit."
+		puts "\t? - Print help."
+	else
+		puts "WARNING: invalid input. Type '?' for help."
+	end
+	
+	next if actions.count > 0
+	
+	puts
+	actions << @cli.ask('[nlsxwq?] > '){ |q| q.character = true }.downcase
+end
