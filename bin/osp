@@ -33,6 +33,10 @@ end
 args = opts.parse(ARGV)
 
 
+if !STDIN.tty?
+	raise "STDIN isn't a TTY."
+end
+
 @cli = HighLine.new
 
 puts "OSP - OneShallPass #{TheFox::OSP::VERSION}"
