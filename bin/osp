@@ -18,9 +18,6 @@ require 'rainbow'
 require 'msgpack'
 require 'osp'
 
-#msg = [1,2,3].to_msgpack
-#MessagePack.unpack(msg)
-
 
 options = {
 	:database_path => "#{Dir.home}/.osp",
@@ -52,9 +49,9 @@ puts
 puts 'Master Login'
 
 # email    = @cli.ask('   Email: ')
-puts '   Email: xyz@example.com'
+puts '   Email: xyz@example.com' # TODO
 # password = @cli.ask('Password: '){ |q| q.echo = '*' }
-puts 'Password: xyz'
+puts 'Password: xyz' # TODO
 
 Console.cursor_jump_to_column
 Console.cursor_up(2)
@@ -64,8 +61,14 @@ puts '   Email: *****'
 puts 'Password: *****'
 puts
 
-email = 'xyz@example.com'
-password = 'xyz'
+email = 'xyz@example.com' # TODO
+password = 'xyz' # TODO
+#password = 'xy1' # TODO
+
+printf "Calculating base hash: #{TheFox::OSP::HASHES_N} (#{TheFox::OSP::HASHES_EXP}-bit) - please wait ..."
+osp = TheFox::OSP::OSP.new(email, password, TheFox::OSP::HASHES_N)
+osp.key_derivation
+puts ' done'
 
 database = {
 	'meta' => {
@@ -78,27 +81,57 @@ database = {
 has_database = false
 has_database_changes = false
 if File.exist?(options[:database_path])
-	puts "Found database file: #{options[:database_path]}",
+	puts "Use database file: #{options[:database_path]}",
 		'Try to open it ...'
 	
 	begin
-		database = MessagePack.unpack(File.binread(options[:database_path]))
-		database['hosts'] = database['hosts'].map{ |name, host| [name, TheFox::OSP::Host.from_h(host)] }.to_h
+		puts "Read file '#{options[:database_path]}'."
+		db_meta = File.binread(options[:database_path])
+		
+		puts 'Process metadata.'
+		db_meta = Base64.strict_decode64(db_meta)
+		db_meta = MessagePack.unpack(db_meta)
+		
+		db_e = Base64.strict_decode64(db_meta['db'])
+		mac = OpenSSL::Digest::SHA256.digest(db_e)
+		if db_meta['mac'] == mac
+			puts 'Setup database encryption.'
+			dk_sha256 = OpenSSL::Digest::SHA256.digest(osp.dk)
+			iv = Base64.strict_decode64(db_meta['iv'])
+			
+			aes = OpenSSL::Cipher::Cipher.new('AES-256-CBC')
+			aes.decrypt
+			aes.key = dk_sha256
+			aes.iv = iv
+			
+			begin
+				puts 'Decrypt database.'
+				db_b64 = aes.update(db_e)
+				db_b64 << aes.final
+			rescue Exception => e
+				raise 'Incorrect email and password combination.'
+			end
+			
+			puts 'Build database.'
+			database = MessagePack.unpack(Base64.strict_decode64(db_b64))
+			
+			database['hosts'] = database['hosts'].map{ |name, host|
+				host_o = TheFox::OSP::Host.from_h(host)
+				host_o.osp = osp
+				[name, host_o]
+			}.to_h
+			
+			puts 'Startup done.'
+		else
+			raise 'Integrity check failed.'
+		end
 	rescue Exception => e
 		puts "FATAL ERROR: couldn't open database:"
-		puts "'#{e}'"
+		puts "#{e}"
 		
-		exit
+		exit 1
 	end
 end
-
-printf "Calculating base hash: #{TheFox::OSP::HASHES_N} (#{TheFox::OSP::HASHES_EXP}-bit) - please wait ..."
-
-osp = TheFox::OSP::OSP.new(email, password, TheFox::OSP::HASHES_N)
-osp.key_derivation
-puts ' done'
-
-database['hosts'].each{ |name, host| host.osp = osp }
 
 def password_callback_method(step, pw)
 	printf '.'
@@ -321,15 +354,45 @@ while true
 			
 			database['meta']['updated_at'] = DateTime.now.to_s
 			
+			# http://stackoverflow.com/questions/9049789/aes-encryption-key-versus-iv
+			# http://keepass.info/help/base/security.html
+			# https://gist.github.com/byu/99651
+			
+			puts 'Make temp database.'
+			db_c = database.clone
+			db_c['hosts'] = db_c['hosts'].map{ |name, host| [name, host.to_h] }.to_h
+			
+			puts 'Setup database encryption.'
+			dk_sha256 = OpenSSL::Digest::SHA256.digest(osp.dk)
+			iv = OpenSSL::Cipher::Cipher.new('AES-256-CBC').random_iv
+			
+			aes = OpenSSL::Cipher::Cipher.new('AES-256-CBC')
+			aes.encrypt
+			aes.key = dk_sha256
+			aes.iv = iv
+			
+			puts 'Encrypt database.'
+			db_e = aes.update(Base64.strict_encode64(db_c.to_msgpack))
+			db_e << aes.final
+			
+			mac = OpenSSL::Digest::SHA256.digest(db_e)
+			
+			db_out = {
+				'version' => 1,
+				'iv' => Base64.strict_encode64(iv),
+				'db' => Base64.strict_encode64(db_e),
+				'mac' => mac,
+			}
+			db_out = db_out.to_msgpack
+			db_out = Base64.strict_encode64(db_out)
+			
 			if File.exist?(options[:database_path])
 				puts "Backup old file to        '#{backup}'."
 				FileUtils.mv(options[:database_path], backup)
 			end
 			
 			puts "Write temp file to        '#{tmp}'."
-			db_c = database.clone
-			db_c['hosts'] = db_c['hosts'].map{ |name, host| [name, host.to_h] }.to_h
-			File.binwrite(tmp, db_c.to_msgpack)
+			File.binwrite(tmp, db_out)
 			
 			puts "Finally move temp file to '#{options[:database_path]}'."
 			FileUtils.mv(tmp, options[:database_path])

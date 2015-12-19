@@ -18,6 +18,7 @@ module TheFox
 		
 		class OSP
 			
+			attr_accessor :dk
 			attr_accessor :hashes
 			
 			def initialize(email, password, hashes = HASHES_N)
