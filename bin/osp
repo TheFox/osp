@@ -350,7 +350,8 @@ while true
 	when 'w'
 		if has_database_changes
 			tmp = "#{options[:database_path]}~"
-			backup = "#{options[:database_path]}~backup"
+			
+			
 			
 			database['meta']['updated_at'] = DateTime.now.to_s
 			
@@ -386,15 +387,16 @@ while true
 			db_out = db_out.to_msgpack
 			db_out = Base64.strict_encode64(db_out)
 			
-			if File.exist?(options[:database_path])
-				puts "Backup old file to        '#{backup}'."
-				FileUtils.mv(options[:database_path], backup)
-			end
-			
-			puts "Write temp file to        '#{tmp}'."
+			puts "Write temp file to '#{tmp}'."
 			File.binwrite(tmp, db_out)
 			
-			puts "Finally move temp file to '#{options[:database_path]}'."
+			backup_dts = Time.now.strftime('%Y%m%d-%H%M%S')
+			backup = "#{options[:database_path]}~backup_#{backup_dts}_" + Digest::SHA256.file(tmp).hexdigest[0..7]
+			
+			puts "Backup temp file to '#{backup}'."
+			FileUtils.cp(tmp, backup)
+			
+			puts "Finally, move temp file to '#{options[:database_path]}'."
 			FileUtils.mv(tmp, options[:database_path])
 			
 			has_database_changes = false
