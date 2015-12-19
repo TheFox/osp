@@ -1,5 +1,16 @@
 # One Shall Pass for Command-line
 
+## Install
+
+The preferred method of installation is via RubyGems.org:  
+<https://rubygems.org/gems/osp>
+
+	gem install osp
+
+or via `Gemfile`:
+
+	gem 'osp', '~>0.1'
+
 ## Project Links
 
 - [Blog Post about OSP](http://blog.fox21.at/2015/12/19/one-shall-pass-for-command-line.html)
