@@ -48,10 +48,10 @@ puts
 
 puts 'Master Login'
 
-# email    = @cli.ask('   Email: ')
-puts '   Email: xyz@example.com' # TODO
-# password = @cli.ask('Password: '){ |q| q.echo = '*' }
-puts 'Password: xyz' # TODO
+email    = @cli.ask('   Email: ')
+#puts '   Email: xyz@example.com' # TODO
+password = @cli.ask('Password: '){ |q| q.echo = '*' }
+#puts 'Password: xyz' # TODO
 
 Console.cursor_jump_to_column
 Console.cursor_up(2)
@@ -61,8 +61,8 @@ puts '   Email: *****'
 puts 'Password: *****'
 puts
 
-email = 'xyz@example.com' # TODO
-password = 'xyz' # TODO
+# email = 'xyz@example.com' # TODO
+# password = 'xyz' # TODO
 #password = 'xy1' # TODO
 
 printf "Calculating base hash: #{TheFox::OSP::HASHES_N} (#{TheFox::OSP::HASHES_EXP}-bit) - please wait ..."
