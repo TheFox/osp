@@ -306,7 +306,7 @@ while true
 					
 					if !selected_host.nil?
 						host_edit(osp, selected_host)
-						host_show(selected_host)
+						host_show(selected_host, true)
 						
 						database['hosts'][selected_host.name] = selected_host
 						
@@ -350,8 +350,6 @@ while true
 	when 'w'
 		if has_database_changes
 			tmp = "#{options[:database_path]}~"
-			
-			
 			
 			database['meta']['updated_at'] = DateTime.now.to_s
 			
