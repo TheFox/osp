@@ -5,14 +5,9 @@ raise 'Ruby >=2.1 required' unless RUBY_VERSION >= '2.1.0'
 
 require 'optparse'
 require 'fileutils'
-#require 'securerandom'
-#require 'openssl'
-#require 'base64'
-# require 'yaml/store'
 require 'pp'
 
 require 'bundler/setup'
-#require 'highline/import'
 require 'highline'
 require 'rainbow'
 require 'msgpack'
@@ -36,7 +31,6 @@ opts = OptionParser.new do |opts|
 		exit 3
 	end
 end
-#ARGV << '-h' if ARGV.count == 0
 args = opts.parse(ARGV)
 
 
@@ -47,23 +41,15 @@ puts TheFox::OSP::HOMEPAGE
 puts
 
 puts 'Master Login'
-
 email    = @cli.ask('   Email: ')
-#puts '   Email: xyz@example.com' # TODO
 password = @cli.ask('Password: '){ |q| q.echo = '*' }
-#puts 'Password: xyz' # TODO
 
 Console.cursor_jump_to_column
 Console.cursor_up(2)
 Console.screen_clear_to_bottom
-
 puts '   Email: *****'
 puts 'Password: *****'
 puts
-
-# email = 'xyz@example.com' # TODO
-# password = 'xyz' # TODO
-#password = 'xy1' # TODO
 
 printf "Calculating base hash: #{TheFox::OSP::HASHES_N} (#{TheFox::OSP::HASHES_EXP}-bit) - please wait ..."
 osp = TheFox::OSP::OSP.new(email, password, TheFox::OSP::HASHES_N)
@@ -158,16 +144,9 @@ def host_edit(osp, host = nil)
 	host = TheFox::OSP::Host.new(osp) if host.nil?
 	
 	tmp = @cli.ask('      Name: ' + (!host.name.nil? ? "[#{host.name}]" : '') + ' ').strip.to_s
-	# puts "name: '#{tmp}' #{tmp.class}"
-	
 	host.name = tmp if tmp != ''
-	# puts "name: '#{host.name}' #{host.name.class}"
-	
 	host.name = nil if host.name == ''
-	# puts "name: '#{host.name}' #{host.name.class}"
-	
 	if host.name.nil?
-		# puts "No host input."
 		return nil
 	end
 	
@@ -221,12 +200,9 @@ while true
 		hosts_n = database['hosts'].count
 		format = '%' + hosts_n.to_s.length.to_s + 'd'
 		
-		# puts "format: '#{format}'"
-		
 		n = 0
 		database['hosts'].values.each do |host|
 			n += 1
-			# pp host
 			printf "#{format}. %s\n", n, host.name
 		end
 	when 's'

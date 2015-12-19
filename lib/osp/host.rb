@@ -4,16 +4,8 @@ module TheFox
 		
 		class Host
 			
-			# attr_accessor :osp
-			# attr_accessor :version
 			attr_accessor :created_at
 			attr_accessor :updated_at
-			# attr_accessor :name
-			# attr_accessor :generation
-			# attr_accessor :length
-			# attr_accessor :symbols
-			# attr_accessor :hashes
-			# attr_accessor :password
 			
 			def initialize(osp = nil)
 				@osp = osp
@@ -47,14 +39,6 @@ module TheFox
 			def version
 				@version.to_i
 			end
-			
-			# def created_at=(v)
-			# 	@created_at = v
-			# end
-			
-			# def created_at
-			# 	@created_at
-			# end
 			
 			def name=(v)
 				v = nil if v == ''
@@ -99,7 +83,6 @@ module TheFox
 			
 			def generate_password(regenerate = false)
 				if @password.nil? && !@osp.nil? || regenerate
-					# puts "host name: '#{@name}'"
 					@password = @osp.password(@name, @length, @generation, @symbols)
 				end
 			end
@@ -127,8 +110,6 @@ module TheFox
 					'length' => @length,
 					'symbols' => @symbols,
 					'hashes' => @hashes,
-					
-					#'password' => @password,
 				}
 			end
 			

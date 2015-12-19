@@ -30,14 +30,7 @@ module TheFox
 			end
 			
 			def key_derivation
-				# puts "password: #{@password}"
-				# puts "email: #{@email}"
-				# puts "hashes: #{@hashes}"
-				
 				@dk = OpenSSL::PKCS5.pbkdf2_hmac(@password, @email, @hashes, 64, OpenSSL::Digest::SHA512.new)
-				# pp @dk.length
-				# pp @dk.length * 8
-				# pp @dk.to_hex
 			end
 			
 			def password(host_name, length = 16, generation = 1, symbols = 1)
@@ -49,14 +42,10 @@ module TheFox
 				step = 0
 				while pw.nil?
 					raw = [ID, @email, host_name, generation, step]
-					# pp raw
 					data = raw.to_msgpack
 					hmac_p = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA512.new, @dk, data)
 					hmac_b64 = Base64.strict_encode64(hmac_p)
 					pw = hmac_b64 if is_ok_pw(hmac_b64)
-					
-					# pp hmac_b64[0..16]
-					#sleep 0.1
 					
 					@password_callback_method.call(step, hmac_b64) if !@password_callback_method.nil?
 					step += 1
@@ -64,14 +53,12 @@ module TheFox
 				
 				if symbols > 0
 					sub_method = find_method_to_sub(pw)
-					#puts "sub_method = #{sub_method}"
 					
 					_b64map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 					
 					indices = []
 					(0..PASSWORD_MIN_SIZE).each do |n|
 						c = pw[n]
-						#puts "#{n} = #{c}"
 						if c.method(sub_method).call
 							indices << n
 							if indices.count >= symbols
@@ -79,8 +66,6 @@ module TheFox
 							end
 						end
 					end
-					
-					#pp indices
 					
 					_map = "`~!@#$%^&*()-_+={}[]|;:,<>.?/"
 					_map_len = _map.length
@@ -94,15 +79,10 @@ module TheFox
 						x = _map[i % _map_len]
 						arr << x
 						last = index + 1
-						
-						#puts "#{index} = '#{c}' '#{i}' '#{x}'    #{last}"
 					end
 					arr << pw[last..-1]
-					#pp arr
 					pw = arr.join
 				end
-				
-				#puts "length: #{length}"
 				pw[0...length]
 			end
 			
@@ -120,8 +100,6 @@ module TheFox
 				(0...PASSWORD_MIN_SIZE).each do |n|
 					c = pw[n]
 					
-					# puts "#{n} = #{c}"
-					
 					if c.is_digit?
 						digits += 1
 					elsif c.is_upper?
@@ -136,7 +114,6 @@ module TheFox
 				bad = lambda { |x| x == 0 || x > 5 }
 				
 				if bad.call(caps) || bad.call(lowers) || bad.call(digits)
-					#puts 'return false'
 					return false
 				end
 				
@@ -163,8 +140,6 @@ module TheFox
 					elsif c.is_lower?
 						lowers += 1
 					end
-					
-					#puts "#{n} = #{c}   #{digits} #{caps} #{lowers}"
 				end
 				
 				rv = ''
@@ -175,7 +150,6 @@ module TheFox
 				else
 					rv = 'is_upper?'
 				end
-				#rv = 'is_upper?'
 				rv
 			end
 			
