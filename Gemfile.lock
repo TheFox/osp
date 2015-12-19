@@ -4,7 +4,6 @@ PATH
     osp (0.1.0.pre.dev.2)
       highline (~> 1.7)
       msgpack (~> 0.7)
-      rainbow (~> 2.0)
       thefox-ext (~> 1.2)
 
 GEM
@@ -13,7 +12,6 @@ GEM
     highline (1.7.8)
     minitest (5.8.3)
     msgpack (0.7.1)
-    rainbow (2.0.0)
     thefox-ext (1.2.0)
 
 PLATFORMS

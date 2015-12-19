@@ -9,7 +9,6 @@ require 'pp'
 
 require 'bundler/setup'
 require 'highline'
-require 'rainbow'
 require 'msgpack'
 require 'osp'
 
