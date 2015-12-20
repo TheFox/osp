@@ -60,7 +60,7 @@ puts 'Password: *****'
 puts
 
 @osp_class = TheFox::OSP::OSP
-#@osp_class = TheFox::OSP::OSPDev
+@osp_class = TheFox::OSP::OSPDev
 
 printf "Calculating base hash: #{@osp_class::HASHES_N} (#{@osp_class::HASHES_EXP}-bit) - please wait ..."
 @osp = @osp_class.new(email, password)
@@ -212,22 +212,25 @@ while true
 					index = 1
 					if found_hosts.count > 1
 						index = @cli.ask('Show host, select by number: ', Integer){ |q|
-							q.character = true if found_hosts.count < 10
-							q.in = 1..(found_hosts.count) }.to_i
+							q.character = true if found_hosts.count < 10 }.to_i
 						puts
 					end
 					
-					puts "Host ##{index} selected:"
-					index -= 1
-					selected_host = nil
-					begin
-						selected_host = found_hosts.values[index]
-					rescue Exception => e
-						puts "ERROR: #{e}"
-					end
-					
-					if !selected_host.nil?
-						host_show(selected_host)
+					if index >= 1 && index <= found_hosts.count
+						puts "Host ##{index} selected:"
+						index -= 1
+						selected_host = nil
+						begin
+							selected_host = found_hosts.values[index]
+						rescue Exception => e
+							puts "ERROR: #{e}"
+						end
+						
+						if !selected_host.nil?
+							host_show(selected_host)
+						end
+					else
+						puts 'Abort.'
 					end
 				else
 					puts 'No hosts found.'
@@ -238,37 +241,66 @@ while true
 					index = 1
 					if found_hosts.count > 1
 						index = @cli.ask('Edit, select host by number: ', Integer){ |q|
-							q.character = true if found_hosts.count < 10
-							q.in = 1..(found_hosts.count) }.to_i
+							q.character = true if found_hosts.count < 10 }.to_i
 						puts
 					end
 					
-					puts "Host ##{index} selected:"
-					index -= 1
-					selected_host = nil
-					begin
-						selected_host = found_hosts.values[index].clone
-					rescue Exception => e
-						puts "ERROR: #{e}"
-					end
-					
-					if !selected_host.nil?
-						host_edit(selected_host)
-						host_show(selected_host, true)
+					if index >= 1 && index <= found_hosts.count
+						puts "Host ##{index} selected:"
+						index -= 1
+						selected_host = nil
+						begin
+							selected_host = found_hosts.values[index].clone
+						rescue Exception => e
+							puts "ERROR: #{e}"
+						end
 						
-						@database.add_host(selected_host)
+						if !selected_host.nil?
+							host_edit(selected_host)
+							host_show(selected_host, true)
+							
+							@database.add_host(selected_host)
+						end
+					else
+						puts 'Abort.'
 					end
 				else
 					puts 'No hosts found.'
 				end
-			# when 'd'
-			# 	puts
-			# 	if found_hosts.count > 0
-			# 		puts 'Delete'
-			# 		puts
-			# 	else
-			# 		puts 'No hosts found.'
-			# 	end
+			when 'd'
+				puts
+				if found_hosts.count > 0
+					index = 1
+					if found_hosts.count > 1
+						index = @cli.ask('Delete, select host by number: ', Integer){ |q|
+							q.character = true if found_hosts.count < 10 }.to_i
+						puts
+					end
+					
+					if index >= 1 && index <= found_hosts.count
+						puts "Delete host ##{index}."
+						index -= 1
+						selected_host = nil
+						begin
+							selected_host = found_hosts.values[index]
+						rescue Exception => e
+							puts "ERROR: #{e}"
+						end
+						
+						if !selected_host.nil?
+							if @database.remove_host(selected_host)
+								found_hosts.delete(selected_host.name)
+								puts "Host '#{selected_host.name}' deleted."
+							else
+								puts "ERROR: Can't delete host '#{selected_host.name}'."
+							end
+						end
+					else
+						puts 'Abort.'
+					end
+				else
+					puts 'No hosts found.'
+				end
 			when 'q'
 				break
 			when '?'
@@ -278,7 +310,7 @@ while true
 				puts "\tl - List found hosts."
 				puts "\ti - Print informations about a host found by a search."
 				puts "\te - Edit a host found by search."
-				# puts "\td - Delete a host found by search."
+				puts "\td - Delete a host found by search."
 				puts "\tq - Quit search."
 				puts "\t? - Print help."
 			else
@@ -288,7 +320,7 @@ while true
 			next if search_actions.count > 0
 			
 			puts
-			search_actions << @cli.ask('[slieq?] >> '){ |q| q.character = true }.downcase
+			search_actions << @cli.ask('[sliedq?] >> '){ |q| q.character = true }.downcase
 		end
 	when 'x'
 		actions << 'q'

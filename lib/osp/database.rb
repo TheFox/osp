@@ -160,6 +160,17 @@ module TheFox
 				@has_changed = true
 			end
 			
+			def remove_host(host)
+				if @data['hosts'].has_key?(host.name)
+					@data['hosts'].delete(host.name)
+					update
+					@has_changed = true
+					true
+				else
+					false
+				end
+			end
+			
 		end
 		
 	end
