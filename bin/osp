@@ -17,11 +17,16 @@ options = {
 	:database_path => "#{Dir.home}/.osp",
 }
 opts = OptionParser.new do |opts|
-	opts.banner = 'Usage: osp'
+	opts.banner = 'Usage: osp [options]'
 	opts.separator('')
 	
 	opts.on('-d', '--database <path>', 'Path to the database file.') do |path|
 		options[:database_path] = path
+	end
+	
+	opts.on_tail('--version', 'Show version.') do
+		puts TheFox::OSP::VERSION
+		exit
 	end
 	
 	opts.on_tail('-h', '--help', 'Show this message.') do
