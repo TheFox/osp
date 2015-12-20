@@ -60,7 +60,7 @@ puts 'Password: *****'
 puts
 
 @osp_class = TheFox::OSP::OSP
-@osp_class = TheFox::OSP::OSPDev
+#@osp_class = TheFox::OSP::OSPDev
 
 printf "Calculating base hash: #{@osp_class::HASHES_N} (#{@osp_class::HASHES_EXP}-bit) - please wait ..."
 @osp = @osp_class.new(email, password)
@@ -340,12 +340,14 @@ while true
 				actions << 'x'
 			else
 				really = @cli.ask('Really? [yN] ', String){ |q| q.character = true }.strip.downcase
-				really = 'y' if really == ''
+				really = 'n' if really == ''
 				puts "Answer: '#{really}'"
 				
 				if really == 'y'
 					@database.has_changed = false
 					actions << 'q'
+				else
+					puts 'Qutting aborted.'
 				end
 			end
 		else
