@@ -59,8 +59,11 @@ puts '   Email: *****'
 puts 'Password: *****'
 puts
 
-printf "Calculating base hash: #{TheFox::OSP::HASHES_N} (#{TheFox::OSP::HASHES_EXP}-bit) - please wait ..."
-osp = TheFox::OSP::OSP.new(email, password, TheFox::OSP::HASHES_N)
+osp_class = TheFox::OSP::OSP
+#osp_class = TheFox::OSP::OSPDev
+
+printf "Calculating base hash: #{osp_class::HASHES_N} (#{osp_class::HASHES_EXP}-bit) - please wait ..."
+osp = osp_class.new(email, password, osp_class::HASHES_N)
 osp.key_derivation
 puts ' done'
 
