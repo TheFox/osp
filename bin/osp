@@ -59,81 +59,38 @@ puts '   Email: *****'
 puts 'Password: *****'
 puts
 
-osp_class = TheFox::OSP::OSP
-#osp_class = TheFox::OSP::OSPDev
+@osp_class = TheFox::OSP::OSP
+#@osp_class = TheFox::OSP::OSPDev
 
-printf "Calculating base hash: #{osp_class::HASHES_N} (#{osp_class::HASHES_EXP}-bit) - please wait ..."
-osp = osp_class.new(email, password, osp_class::HASHES_N)
-osp.key_derivation
+printf "Calculating base hash: #{@osp_class::HASHES_N} (#{@osp_class::HASHES_EXP}-bit) - please wait ..."
+@osp = @osp_class.new(email, password, @osp_class::HASHES_N)
+@osp.key_derivation
 puts ' done'
 
-database = {
-	'meta' => {
-		'version' => 1,
-		'created_at' => DateTime.now.to_s,
-		'updated_at' => DateTime.now.to_s,
-	},
-	'hosts' => {}
-}
-has_database = false
-has_database_changes = false
-if File.exist?(options[:database_path])
-	puts "Use database file: #{options[:database_path]}",
-		'Try to open it ...'
-	
-	begin
-		puts "Read file '#{options[:database_path]}'."
-		db_meta = File.binread(options[:database_path])
-		
-		puts 'Process metadata.'
-		db_meta = Base64.strict_decode64(db_meta)
-		db_meta = MessagePack.unpack(db_meta)
-		
-		db_e = Base64.strict_decode64(db_meta['db'])
-		mac = OpenSSL::Digest::SHA256.digest(db_e)
-		if db_meta['mac'] == mac
-			puts 'Setup database encryption.'
-			dk_sha256 = OpenSSL::Digest::SHA256.digest(osp.dk)
-			iv = Base64.strict_decode64(db_meta['iv'])
-			
-			aes = OpenSSL::Cipher::Cipher.new('AES-256-CBC')
-			aes.decrypt
-			aes.key = dk_sha256
-			aes.iv = iv
-			
-			begin
-				puts 'Decrypt database.'
-				db_b64 = aes.update(db_e)
-				db_b64 << aes.final
-			rescue Exception => e
-				raise 'Incorrect email and password combination.'
-			end
-			
-			puts 'Build database.'
-			database = MessagePack.unpack(Base64.strict_decode64(db_b64))
-			
-			database['hosts'] = database['hosts'].map{ |name, host|
-				host_o = TheFox::OSP::Host.from_h(host)
-				host_o.osp = osp
-				[name, host_o]
-			}.to_h
-			
-			puts 'Startup done.'
-		else
-			raise 'Integrity check failed.'
-		end
-	rescue Exception => e
-		puts "FATAL ERROR: couldn't open database:"
-		puts "#{e}"
-		
-		exit 1
-	end
+def database_load_step(step, msg)
+	puts "#{step} #{msg}"
+end
+
+def database_write_step(step, msg)
+	puts "#{step} #{msg}"
+end
+
+@database = TheFox::OSP::Database.new(options[:database_path], @osp)
+@database.load_callback_method = self.method('database_load_step')
+@database.write_callback_method = self.method('database_write_step')
+begin
+	@database.load
+rescue Exception => e
+	puts
+	puts "FATAL ERROR: couldn't open database:"
+	puts "#{e}"
+	exit 1
 end
 
 def password_callback_method(step, pw)
 	printf '.'
 end
-osp.password_callback_method = self.method('password_callback_method')
+@osp.password_callback_method = self.method('password_callback_method')
 
 def host_show(host, regenerate_password = false)
 	if !host.has_generated_password? || regenerate_password
@@ -151,8 +108,8 @@ def host_show(host, regenerate_password = false)
 	puts "  Password: #{host.password}"
 end
 
-def host_edit(osp, host = nil)
-	host = TheFox::OSP::Host.new(osp) if host.nil?
+def host_edit(host = nil)
+	host = TheFox::OSP::Host.new(@osp) if host.nil?
 	
 	tmp = @cli.ask('      Name: ' + (!host.name.nil? ? "[#{host.name}]" : '') + ' ').strip.to_s
 	host.name = tmp if tmp != ''
@@ -167,7 +124,7 @@ def host_edit(osp, host = nil)
 	
 	host.length     = @cli.ask("    Length: [#{host.length}] ", Integer){ |q|
 		q.default = host.length
-		q.in = TheFox::OSP::PASSWORD_MIN_SIZE..TheFox::OSP::PASSWORD_MAX_SIZE }.to_i
+		q.in = @osp_class::PASSWORD_MIN_SIZE..@osp_class::PASSWORD_MAX_SIZE }.to_i
 	
 	host.symbols    = @cli.ask("   Symbols: [#{host.symbols}] ", Integer){ |q|
 		q.default = host.symbols
@@ -186,7 +143,7 @@ while true
 		puts "Type '?' for help."
 	when 'n'
 		puts
-		host = host_edit(osp)
+		host = host_edit
 		if !host.nil?
 			host_show(host)
 			puts
@@ -196,9 +153,7 @@ while true
 			puts "Answer: '#{add}'"
 			
 			if add == 'y'
-				has_database_changes = true
-				
-				database['hosts'][host.name] = host
+				@database.add_host(host)
 			end
 		else
 			puts "ERROR: hostname can't be nothing."
@@ -208,11 +163,11 @@ while true
 		puts 'List Hosts'
 		puts
 		
-		hosts_n = database['hosts'].count
+		hosts_n = @database.hosts.count
 		format = '%' + hosts_n.to_s.length.to_s + 'd'
 		
 		n = 0
-		database['hosts'].values.each do |host|
+		@database.hosts.values.each do |host|
 			n += 1
 			printf "#{format}. %s\n", n, host.name
 		end
@@ -233,7 +188,7 @@ while true
 				host_name = @cli.ask('Search host names: ', String).strip.downcase
 				re = Regexp.new(host_name, Regexp::IGNORECASE)
 				
-				found_hosts = database['hosts'].select{ |name, host| re.match(host.name) }
+				found_hosts = @database.hosts.select{ |name, host| re.match(host.name) }
 				
 				search_actions << 'l'
 			when 'l'
@@ -292,12 +247,10 @@ while true
 					end
 					
 					if !selected_host.nil?
-						host_edit(osp, selected_host)
+						host_edit(selected_host)
 						host_show(selected_host, true)
 						
-						database['hosts'][selected_host.name] = selected_host
-						
-						has_database_changes = true
+						@database.add_host(selected_host)
 					end
 				else
 					puts 'No hosts found.'
@@ -335,61 +288,9 @@ while true
 		actions << 'q'
 		actions << 'w'
 	when 'w'
-		if has_database_changes
-			tmp = "#{options[:database_path]}~"
-			
-			database['meta']['updated_at'] = DateTime.now.to_s
-			
-			# http://stackoverflow.com/questions/9049789/aes-encryption-key-versus-iv
-			# http://keepass.info/help/base/security.html
-			# https://gist.github.com/byu/99651
-			
-			puts 'Make temp database.'
-			db_c = database.clone
-			db_c['hosts'] = db_c['hosts'].map{ |name, host| [name, host.to_h] }.to_h
-			
-			puts 'Setup database encryption.'
-			dk_sha256 = OpenSSL::Digest::SHA256.digest(osp.dk)
-			iv = OpenSSL::Cipher::Cipher.new('AES-256-CBC').random_iv
-			
-			aes = OpenSSL::Cipher::Cipher.new('AES-256-CBC')
-			aes.encrypt
-			aes.key = dk_sha256
-			aes.iv = iv
-			
-			puts 'Encrypt database.'
-			db_e = aes.update(Base64.strict_encode64(db_c.to_msgpack))
-			db_e << aes.final
-			
-			mac = OpenSSL::Digest::SHA256.digest(db_e)
-			
-			db_out = {
-				'version' => 1,
-				'iv' => Base64.strict_encode64(iv),
-				'db' => Base64.strict_encode64(db_e),
-				'mac' => mac,
-			}
-			db_out = db_out.to_msgpack
-			db_out = Base64.strict_encode64(db_out)
-			
-			puts "Write temp file to '#{tmp}'."
-			File.binwrite(tmp, db_out)
-			
-			backup_dts = Time.now.strftime('%Y%m%d-%H%M%S')
-			backup = "#{options[:database_path]}~backup_#{backup_dts}_" + Digest::SHA256.file(tmp).hexdigest[0..7]
-			
-			puts "Backup temp file to '#{backup}'."
-			FileUtils.cp(tmp, backup)
-			
-			puts "Finally, move temp file to '#{options[:database_path]}'."
-			FileUtils.mv(tmp, options[:database_path])
-			
-			has_database_changes = false
-		else
-			puts 'Nothing changed, nothing written.'
-		end
+		@database.write
 	when 'q'
-		if has_database_changes
+		if @database.has_changed
 			puts
 			puts 'You have unsaved database changes.'
 			
@@ -405,7 +306,7 @@ while true
 				puts "Answer: '#{really}'"
 				
 				if really == 'y'
-					has_database_changes = false
+					@database.has_changed = false
 					actions << 'q'
 				end
 			end
