@@ -63,7 +63,7 @@ puts
 #@osp_class = TheFox::OSP::OSPDev
 
 printf "Calculating base hash: #{@osp_class::HASHES_N} (#{@osp_class::HASHES_EXP}-bit) - please wait ..."
-@osp = @osp_class.new(email, password, @osp_class::HASHES_N)
+@osp = @osp_class.new(email, password)
 @osp.key_derivation
 puts ' done'
 
