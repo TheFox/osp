@@ -6,5 +6,4 @@ before_install:
     - ruby --version
 script:
     - make test
-    - make install
-    - osp --version
+    - ./bin/osp --version
