@@ -9,19 +9,19 @@ require 'thefox-ext'
 module TheFox
 	module OSP
 		
-		ID = 'TheFox-OSP'
-		HASHES_EXP = 24
-		HASHES_N = 2 ** HASHES_EXP
-		PASSWORD_MIN_SIZE = 8
-		PASSWORD_MAX_SIZE = 32
-		SYMBOLS = 1
-		
 		class OSP
+			
+			ID = 'TheFox-OSP'
+			HASHES_EXP = 24
+			HASHES_N = 2 ** HASHES_EXP
+			PASSWORD_MIN_SIZE = 8
+			PASSWORD_MAX_SIZE = 32
+			SYMBOLS = 1
 			
 			attr_accessor :dk
 			attr_accessor :hashes
 			
-			def initialize(email, password, hashes = HASHES_N)
+			def initialize(email, password, hashes = self.class::HASHES_N)
 				@email = email
 				@password = password
 				@hashes = hashes
@@ -33,7 +33,7 @@ module TheFox
 				@dk = OpenSSL::PKCS5.pbkdf2_hmac(@password, @email, @hashes, 64, OpenSSL::Digest::SHA512.new)
 			end
 			
-			def password(host_name, length = 16, generation = 1, symbols = 1)
+			def password(host_name, length = 16, generation = 1, symbols = self.class::SYMBOLS)
 				raise ArgumentError, "'host_name' can't be '' or nil" if host_name.nil? || host_name == '' || !host_name
 				
 				key_derivation if @dk.nil?
@@ -41,7 +41,7 @@ module TheFox
 				pw = nil
 				step = 0
 				while pw.nil?
-					raw = [ID, @email, host_name, generation, step]
+					raw = [self.class::ID, @email, host_name, generation, step]
 					data = raw.to_msgpack
 					hmac_p = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA512.new, @dk, data)
 					hmac_b64 = Base64.strict_encode64(hmac_p)
@@ -57,7 +57,7 @@ module TheFox
 					_b64map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 					
 					indices = []
-					(0..PASSWORD_MIN_SIZE).each do |n|
+					(0..self.class::PASSWORD_MIN_SIZE).each do |n|
 						c = pw[n]
 						if c.method(sub_method).call
 							indices << n
@@ -97,7 +97,7 @@ module TheFox
 				lowers = 0
 				digits = 0
 				
-				(0...PASSWORD_MIN_SIZE).each do |n|
+				(0...self.class::PASSWORD_MIN_SIZE).each do |n|
 					c = pw[n]
 					
 					if c.is_digit?
@@ -117,7 +117,7 @@ module TheFox
 					return false
 				end
 				
-				(PASSWORD_MIN_SIZE...PASSWORD_MAX_SIZE).each do |n|
+				(self.class::PASSWORD_MIN_SIZE...self.class::PASSWORD_MAX_SIZE).each do |n|
 					if !pw[n].is_valid?
 						return false
 					end
@@ -131,7 +131,7 @@ module TheFox
 				lowers = 0
 				digits = 0
 				
-				(0...PASSWORD_MIN_SIZE).each do |n|
+				(0...self.class::PASSWORD_MIN_SIZE).each do |n|
 					c = pw[n]
 					if c.is_digit?
 						digits += 1

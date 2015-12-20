@@ -1,4 +1,5 @@
 /.bundle/
 .setup
+/bin/dev
 CHANGELOG-*.txt
 /releases/
