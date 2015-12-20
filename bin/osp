@@ -209,11 +209,14 @@ while true
 			when 'i'
 				puts
 				if found_hosts.count > 0
-					index = @cli.ask('Show host, select by number: ', Integer){ |q|
-						q.character = true if found_hosts.count < 10
-						q.in = 1..(found_hosts.count) }.to_i
+					index = 1
+					if found_hosts.count > 1
+						index = @cli.ask('Show host, select by number: ', Integer){ |q|
+							q.character = true if found_hosts.count < 10
+							q.in = 1..(found_hosts.count) }.to_i
+						puts
+					end
 					
-					puts
 					puts "Host ##{index} selected:"
 					index -= 1
 					selected_host = nil
@@ -232,11 +235,14 @@ while true
 			when 'e'
 				puts
 				if found_hosts.count > 0
-					index = @cli.ask('Edit, select host by number: ', Integer){ |q|
-						q.character = true if found_hosts.count < 10
-						q.in = 1..(found_hosts.count) }.to_i
+					index = 1
+					if found_hosts.count > 1
+						index = @cli.ask('Edit, select host by number: ', Integer){ |q|
+							q.character = true if found_hosts.count < 10
+							q.in = 1..(found_hosts.count) }.to_i
+						puts
+					end
 					
-					puts
 					puts "Host ##{index} selected:"
 					index -= 1
 					selected_host = nil
