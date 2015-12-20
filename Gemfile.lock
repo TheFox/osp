@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    osp (0.2.0)
+    osp (0.3.0.pre.dev.1)
       highline (~> 1.7)
       msgpack (~> 0.7)
       thefox-ext (~> 1.2)

@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
 	spec.email         = 'christian@fox21.at'
 	
 	spec.summary       = %q{One Shall Pass}
-	spec.description   = %q{One Shall Pass for Command Line.}
+	spec.description   = %q{Password Manager: One Shall Pass for Command Line.}
 	spec.homepage      = TheFox::OSP::HOMEPAGE
 	spec.license       = 'GPL-3.0'
 	
