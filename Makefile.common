@@ -1,6 +1,6 @@
 
 # Ruby Common Big
-# 2015-12-15
+# 2015-12-21
 
 MV = mv -nv
 RM = rm -rf
@@ -35,7 +35,9 @@ update:
 
 .PHONY: clean
 clean:
+	$(RM) .bundle
 	$(RM) .setup
+	$(RM) Gemfile.lock
 
 .PHONY: release
 release: | releases

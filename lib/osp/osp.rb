@@ -2,9 +2,8 @@
 require 'base64'
 require 'openssl'
 require 'msgpack'
-require 'pp'
-
 require 'thefox-ext'
+
 
 module TheFox
 	module OSP

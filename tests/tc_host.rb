@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'bundler/setup'
 require 'minitest/autorun'
 require 'osp'
+
 
 class TestHost < MiniTest::Test
 	def test_base

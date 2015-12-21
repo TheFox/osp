@@ -1,13 +1,8 @@
 #!/usr/bin/env ruby
 # coding: UTF-8
 
-raise 'Ruby >=2.1 required' unless RUBY_VERSION >= '2.1.0'
-
 require 'optparse'
 require 'fileutils'
-require 'pp'
-
-require 'bundler/setup'
 require 'highline'
 require 'msgpack'
 require 'osp'
@@ -25,7 +20,8 @@ opts = OptionParser.new do |opts|
 	end
 	
 	opts.on_tail('--version', 'Show version.') do
-		puts TheFox::OSP::VERSION
+		puts "osp #{TheFox::OSP::VERSION}"
+		puts TheFox::OSP::HOMEPAGE
 		exit
 	end
 	
