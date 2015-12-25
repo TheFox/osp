@@ -9,7 +9,7 @@ The preferred method of installation is via RubyGems.org:
 
 or via `Gemfile`:
 
-	gem 'osp', '~>0.1'
+	gem 'osp', '~>0.3'
 
 ## Project Links
 

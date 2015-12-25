@@ -101,8 +101,8 @@ module TheFox
 					# https://gist.github.com/byu/99651
 					
 					write_callback(1100, 'Make temp database.')
-					db_c = @data
-					db_c['hosts'] = db_c['hosts'].map{ |name, host| [name, host.to_h] }.to_h
+					db_c = @data.clone
+					db_c['hosts'] = db_c['hosts'].map{ |name, host| [name, host.clone.to_h] }.to_h
 					
 					write_callback(1200, 'Setup database encryption.')
 					dk_sha256 = OpenSSL::Digest::SHA256.digest(@osp.dk)
