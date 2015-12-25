@@ -11,22 +11,22 @@ require 'osp'
 options = {
 	:database_path => "#{Dir.home}/.osp",
 }
-opts = OptionParser.new do |opts|
-	opts.banner = 'Usage: osp [options]'
-	opts.separator('')
+opts = OptionParser.new do |o|
+	o.banner = 'Usage: osp [options]'
+	o.separator('')
 	
-	opts.on('-d', '--database <path>', 'Path to the database file.') do |path|
+	o.on('-d', '--database <path>', 'Path to the database file.') do |path|
 		options[:database_path] = path
 	end
 	
-	opts.on_tail('--version', 'Show version.') do
+	o.on_tail('--version', 'Show version.') do
 		puts "osp #{TheFox::OSP::VERSION}"
 		puts TheFox::OSP::HOMEPAGE
 		exit
 	end
 	
-	opts.on_tail('-h', '--help', 'Show this message.') do
-		puts opts
+	o.on_tail('-h', '--help', 'Show this message.') do
+		puts o
 		puts
 		exit 3
 	end
@@ -56,7 +56,7 @@ puts 'Password: *****'
 puts
 
 @osp_class = TheFox::OSP::OSP
-#@osp_class = TheFox::OSP::OSPDev
+@osp_class = TheFox::OSP::OSPDev if $DEBUG
 
 printf "Calculating base hash: #{@osp_class::HASHES_N} (#{@osp_class::HASHES_EXP}-bit) - please wait ..."
 @osp = @osp_class.new(email, password)
