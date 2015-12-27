@@ -95,8 +95,7 @@ def host_show(host, regenerate_password = false)
 		puts ' done'
 	end
 	
-	puts
-	puts "      Name: #{host.name}"
+	puts "  Hostname: #{host.name}"
 	puts "Generation: #{host.generation}"
 	puts "    Length: #{host.length}"
 	puts "   Symbols: #{host.symbols}"
@@ -107,7 +106,11 @@ end
 def host_edit(host = nil)
 	host = TheFox::OSP::Host.new(@osp) if host.nil?
 	
-	tmp = @cli.ask('      Name: ' + (!host.name.nil? ? "[#{host.name}]" : '') + ' ').strip.to_s
+	puts
+	puts 'New Host'
+	puts
+	
+	tmp = @cli.ask('  Hostname: ' + (!host.name.nil? ? "[#{host.name}]" : '') + ' ').strip.to_s
 	host.name = tmp if tmp != ''
 	host.name = nil if host.name == ''
 	if host.name.nil?
