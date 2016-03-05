@@ -8,15 +8,17 @@ require 'msgpack'
 require 'osp'
 
 
-options = {
+@options = {
 	:database_path => "#{Dir.home}/.osp",
+	:database_lock_path => "#{Dir.home}/.osp~lock",
 }
 opts = OptionParser.new do |o|
 	o.banner = 'Usage: osp [options]'
 	o.separator('')
 	
 	o.on('-d', '--database <path>', 'Path to the database file.') do |path|
-		options[:database_path] = path
+		@options[:database_path] = path
+		@options[:database_lock_path] = "#{path}~lock"
 	end
 	
 	o.on_tail('--version', 'Show version.') do
@@ -43,6 +45,16 @@ end
 puts "OSP - OneShallPass #{TheFox::OSP::VERSION}"
 puts TheFox::OSP::HOMEPAGE
 puts
+
+if File.exist?(@options[:database_lock_path])
+	puts "WARNING: lock file exist: '#{@options[:database_lock_path]}'"
+	overwrite = @cli.ask('Overwrite? '){ |q| q.default = 'n' }.downcase
+	if overwrite == 'n'
+		puts 'Quit.'
+		exit
+	end
+end
+File.binwrite(@options[:database_lock_path], Process.pid)
 
 puts 'Master Login'
 email    = @cli.ask('   Email: ')
@@ -71,7 +83,13 @@ def database_write_step(step, msg)
 	puts "#{step} #{msg}"
 end
 
-@database = TheFox::OSP::Database.new(options[:database_path], @osp)
+def remove_lock
+	if File.exist?(@options[:database_lock_path])
+		FileUtils.rm(@options[:database_lock_path])
+	end
+end
+
+@database = TheFox::OSP::Database.new(@options[:database_path], @osp)
 @database.load_callback_method = self.method('database_load_step')
 @database.write_callback_method = self.method('database_write_step')
 begin
@@ -80,6 +98,7 @@ rescue Exception => e
 	puts
 	puts "FATAL ERROR: couldn't open database:"
 	puts "#{e}"
+	remove_lock
 	exit 1
 end
 
@@ -372,3 +391,5 @@ while true
 	puts
 	actions << @cli.ask('[nlsxwq?] > '){ |q| q.character = true }.downcase
 end
+
+remove_lock

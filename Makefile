@@ -3,6 +3,8 @@ GEM_NAME = osp
 
 include Makefile.common
 
+# Email: root
+# Password: password
 dev:
 	RUBYOPT=-rbundler/setup ruby --debug ./bin/osp -d passwords.osp
 
