@@ -1,6 +1,6 @@
 
 # Ruby Common Big
-# 2015-12-21
+# 2016-02-14
 
 MV = mv -nv
 RM = rm -rf
@@ -9,8 +9,8 @@ BUNDLER = bundle
 BUNDLER_OPTIONS = --jobs=5 --retry=3
 GEMSPEC_FILE = $(GEM_NAME).gemspec
 
-.PHONY: all $(ALL_TARGETS_EXT)
-all: setup
+.PHONY: all
+all: setup $(ALL_TARGETS_EXT)
 
 .PHONY: setup
 setup: .setup
