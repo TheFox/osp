@@ -21,8 +21,8 @@ opts = OptionParser.new do |o|
 		@options[:database_lock_path] = "#{path}~lock"
 	end
 	
-	o.on_tail('--version', 'Show version.') do
-		puts "osp #{TheFox::OSP::VERSION}"
+	o.on_tail('-V', '--version', 'Show version.') do
+		puts "osp #{TheFox::OSP::VERSION} (#{TheFox::OSP::DATE})"
 		puts TheFox::OSP::HOMEPAGE
 		exit
 	end
