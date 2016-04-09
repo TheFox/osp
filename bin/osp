@@ -54,6 +54,8 @@ if File.exist?(@options[:database_lock_path])
 		exit
 	end
 end
+File.write(@options[:database_lock_path], 'tmp')
+File.chmod(0600, @options[:database_lock_path])
 File.binwrite(@options[:database_lock_path], Process.pid)
 
 puts 'Master Login'

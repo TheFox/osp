@@ -129,15 +129,21 @@ module TheFox
 					db_out = Base64.strict_encode64(db_out)
 					
 					write_callback(1300, "Write temp file to '#{tmp}'.")
+					File.write(tmp, 'tmp')
+					File.chmod(0600, tmp)
 					File.binwrite(tmp, db_out)
 					
 					backup_dts = Time.now.strftime('%Y%m%d-%H%M%S')
 					backup = "#{@file_path}~backup_#{backup_dts}_" + Digest::SHA256.file(tmp).hexdigest[0..7]
 					
 					write_callback(1350, "Backup temp file to '#{backup}'.")
+					File.write(backup, 'tmp')
+					File.chmod(0600, backup)
 					FileUtils.cp(tmp, backup)
 					
 					write_callback(1390, "Finally, move temp file to '#{@file_path}'.")
+					File.write(@file_path, 'tmp')
+					File.chmod(0600, @file_path)
 					FileUtils.mv(tmp, @file_path)
 					
 					@has_changed = false
