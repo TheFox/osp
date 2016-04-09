@@ -57,8 +57,13 @@ end
 File.binwrite(@options[:database_lock_path], Process.pid)
 
 puts 'Master Login'
-email    = @cli.ask('   Email: ')
-password = @cli.ask('Password: '){ |q| q.echo = '*' }
+if $DEBUG
+	email = 'example@example.com'
+	password = 'password'
+else
+	email    = @cli.ask('   Email: ')
+	password = @cli.ask('Password: '){ |q| q.echo = '*' }
+end
 
 Console.cursor_jump_to_column
 Console.cursor_up(2)
