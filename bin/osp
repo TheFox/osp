@@ -326,6 +326,8 @@ while true
 				else
 					puts 'No hosts found.'
 				end
+			when 'c'
+				system('clear')
 			when 'q'
 				break
 			when '?'
@@ -336,6 +338,7 @@ while true
 				puts "\ti - Print informations about a host found by a search."
 				puts "\te - Edit a host found by search."
 				puts "\td - Delete a host found by search."
+				puts "\tc - Clear screen."
 				puts "\tq - Quit search."
 				puts "\t? - Print help."
 			else
@@ -345,8 +348,10 @@ while true
 			next if search_actions.count > 0
 			
 			puts
-			search_actions << @cli.ask('[sliedq?] >> '){ |q| q.character = true }.downcase
+			search_actions << @cli.ask('[sliedcq?] >> '){ |q| q.character = true }.downcase
 		end
+	when 'c'
+		system('clear')
 	when 'x'
 		actions << 'q'
 		actions << 'w'
@@ -385,6 +390,7 @@ while true
 		puts "\tn - New password."
 		puts "\tl - List hosts from database."
 		puts "\ts - Search submenu."
+		puts "\tc - Clear screen."
 		puts "\tx - Same as wq."
 		puts "\tw - Write database to file."
 		puts "\tq - Quit."
@@ -396,7 +402,7 @@ while true
 	next if actions.count > 0
 	
 	puts
-	actions << @cli.ask('[nlsxwq?] > '){ |q| q.character = true }.downcase
+	actions << @cli.ask('[nlscxwq?] > '){ |q| q.character = true }.downcase
 end
 
 remove_lock
