@@ -33,7 +33,9 @@ module TheFox
 			end
 			
 			def password(host_name, length = 16, generation = 1, symbols = self.class::SYMBOLS)
-				raise ArgumentError, "'host_name' can't be '' or nil" if host_name.nil? || host_name == '' || !host_name
+				if host_name.nil? || host_name == '' || !host_name
+					raise ArgumentError, "'host_name' can't be '' or nil"
+				end
 				
 				key_derivation if @dk.nil?
 				
@@ -46,7 +48,9 @@ module TheFox
 					hmac_b64 = Base64.strict_encode64(hmac_p)
 					pw = hmac_b64 if is_ok_pw(hmac_b64)
 					
-					@password_callback_method.call(step, hmac_b64) if !@password_callback_method.nil?
+					if !@password_callback_method.nil?
+						@password_callback_method.call(step, hmac_b64)
+					end
 					step += 1
 				end
 				

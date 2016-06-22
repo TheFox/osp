@@ -20,12 +20,14 @@ module TheFox
 				@generation = 1
 				@length = 16
 				@symbols = 1
-				@hashes = !@osp.nil? ? @osp.hashes : nil
+				@hashes = @osp.nil? ? nil : @osp.hashes
 				@password = nil
 			end
 			
 			def osp=(v)
-				raise ArgumentError, 'Wrong type.' if !v.is_a?(TheFox::OSP::OSP)
+				if !v.is_a?(TheFox::OSP::OSP)
+					raise ArgumentError, 'Wrong type.'
+				end
 				
 				@osp = v
 			end
@@ -43,8 +45,7 @@ module TheFox
 			end
 			
 			def name=(v)
-				v = nil if v == ''
-				@name = v
+				@name = v == '' ? nil : v
 			end
 			
 			def name

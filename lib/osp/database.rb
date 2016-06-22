@@ -28,7 +28,9 @@ module TheFox
 			end
 			
 			def load_callback(*o)
-				@load_callback_method.call(*o) if !@load_callback_method.nil?
+				if !@load_callback_method.nil?
+					@load_callback_method.call(*o)
+				end
 			end
 			
 			def load
