@@ -136,7 +136,7 @@ def host_edit(host = nil)
 	puts 'New Host'
 	puts
 	
-	tmp = @cli.ask('  Hostname: ' + (!host.name.nil? ? "[#{host.name}]" : '') + ' ').strip.to_s
+	tmp = @cli.ask('  Hostname: ' + (host.name.nil? ? '[]' : "[#{host.name}]") + ' ').strip.to_s
 	host.name = tmp if tmp != ''
 	host.name = nil if host.name == ''
 	if host.name.nil?
