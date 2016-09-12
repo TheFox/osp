@@ -8,6 +8,10 @@ module TheFox
 			
 			attr_accessor :created_at
 			attr_accessor :updated_at
+			attr_reader :osp
+			attr_reader :name
+			attr_reader :hashes
+			attr_writer :password
 			
 			def initialize(osp = nil)
 				@osp = osp
@@ -32,10 +36,6 @@ module TheFox
 				@osp = v
 			end
 			
-			def osp
-				@osp
-			end
-			
 			def version=(v)
 				@version = v.to_i
 			end
@@ -46,10 +46,6 @@ module TheFox
 			
 			def name=(v)
 				@name = v == '' ? nil : v
-			end
-			
-			def name
-				@name
 			end
 			
 			def generation=(v)
@@ -78,10 +74,6 @@ module TheFox
 			
 			def hashes=(v)
 				@hashes = v
-			end
-			
-			def hashes
-				@hashes
 			end
 			
 			def generate_password(regenerate = false)
@@ -127,4 +119,3 @@ module TheFox
 		end
 	end
 end
-			
