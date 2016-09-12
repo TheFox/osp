@@ -2,5 +2,6 @@
 .setup
 /bin/dev
 CHANGELOG-*.txt
+/coverage/
 Gemfile.lock
 /releases/
