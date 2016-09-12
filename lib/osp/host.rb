@@ -29,8 +29,8 @@ module TheFox
 			end
 			
 			def osp=(v)
-				if !v.is_a?(TheFox::OSP::OSP)
-					raise ArgumentError, 'Wrong type.'
+				if !v.is_a?(OSP)
+					raise ArgumentError, "Wrong type -- #{v.class}"
 				end
 				
 				@osp = v

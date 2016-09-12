@@ -29,6 +29,20 @@ class TestHost < MiniTest::Test
 		assert_equal(nil, host.password)
 	end
 	
+	def test_osp
+		osp = OSP.new('example@example.com', 'test1', 2 ** 10)
+		
+		host = Host.new
+		host.osp = osp
+		
+		assert_same(osp, host.osp)
+	end
+	
+	def test_osp_exception
+		host = Host.new
+		assert_raises(ArgumentError){ host.osp = nil }
+	end
+	
 	def test_version
 		host = Host.new
 		
