@@ -10,4 +10,4 @@ dev:
 
 .PHONY: test
 test:
-	RUBYOPT=-w $(BUNDLER) exec ./tests/ts_all.rb
+	RUBYOPT=-w $(BUNDLER) exec ./test/suite_all.rb

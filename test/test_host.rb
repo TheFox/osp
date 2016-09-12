@@ -5,14 +5,17 @@ require 'osp'
 
 
 class TestHost < MiniTest::Test
+	
+	include TheFox::OSP
+	
 	def test_base
-		osp = TheFox::OSP::Host.new
+		osp = Host.new
 		
 		assert_equal('TheFox::OSP::Host', osp.class.to_s)
 	end
 	
 	def test_initialize
-		host = TheFox::OSP::Host.new
+		host = Host.new
 		
 		assert_equal(nil, host.osp)
 		assert_equal(1, host.version)
@@ -27,7 +30,7 @@ class TestHost < MiniTest::Test
 	end
 	
 	def test_version
-		host = TheFox::OSP::Host.new
+		host = Host.new
 		
 		host.version = 2
 		assert_equal(2, host.version)
@@ -37,7 +40,7 @@ class TestHost < MiniTest::Test
 	end
 	
 	def test_created_at
-		host = TheFox::OSP::Host.new
+		host = Host.new
 		
 		now = DateTime.now
 		host.created_at = now
@@ -45,7 +48,7 @@ class TestHost < MiniTest::Test
 	end
 	
 	def test_updated_at
-		host = TheFox::OSP::Host.new
+		host = Host.new
 		
 		now = DateTime.now
 		host.updated_at = now
@@ -53,7 +56,7 @@ class TestHost < MiniTest::Test
 	end
 	
 	def test_name
-		host = TheFox::OSP::Host.new
+		host = Host.new
 		
 		host.name = ''
 		assert_equal(nil, host.name)
@@ -63,7 +66,7 @@ class TestHost < MiniTest::Test
 	end
 	
 	def test_generation
-		host = TheFox::OSP::Host.new
+		host = Host.new
 		
 		host.generation = 2
 		assert_equal(2, host.generation)
@@ -73,7 +76,7 @@ class TestHost < MiniTest::Test
 	end
 	
 	def test_length
-		host = TheFox::OSP::Host.new
+		host = Host.new
 		
 		host.length = 2
 		assert_equal(2, host.length)
@@ -83,7 +86,7 @@ class TestHost < MiniTest::Test
 	end
 	
 	def test_symbols
-		host = TheFox::OSP::Host.new
+		host = Host.new
 		
 		host.symbols = 2
 		assert_equal(2, host.symbols)
@@ -93,7 +96,7 @@ class TestHost < MiniTest::Test
 	end
 	
 	def test_hashes
-		host = TheFox::OSP::Host.new
+		host = Host.new
 		
 		host.hashes = nil
 		assert_equal(nil, host.hashes)
@@ -106,7 +109,7 @@ class TestHost < MiniTest::Test
 	end
 	
 	def test_password
-		host = TheFox::OSP::Host.new
+		host = Host.new
 		
 		host.password = nil
 		assert_equal(nil, host.password)
@@ -117,4 +120,5 @@ class TestHost < MiniTest::Test
 		host.password = '3'
 		assert_equal('3', host.password)
 	end
+	
 end

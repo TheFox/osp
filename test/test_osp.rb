@@ -5,26 +5,29 @@ require 'osp'
 
 
 class TestOsp < MiniTest::Test
+	
+	include TheFox::OSP
+	
 	def test_that_it_has_a_version_number
-		refute_nil ::TheFox::OSP::VERSION
+		refute_nil(::TheFox::OSP::VERSION)
 	end
 	
 	def test_base
-		osp = TheFox::OSP::OSP.new('example@example.com', 'test1', 2 ** 10)
+		osp = OSP.new('example@example.com', 'test1', 2 ** 10)
 		
 		assert_equal('TheFox::OSP::OSP', osp.class.to_s)
 	end
 	
 	def test_hashes
-		osp = TheFox::OSP::OSP.new('example@example.com', 'test1', 2 ** 10)
+		osp = OSP.new('example@example.com', 'test1', 2 ** 10)
 		assert_equal(2 ** 10, osp.hashes)
 		
-		osp = TheFox::OSP::OSP.new('example@example.com', 'test1', 2 ** 20)
+		osp = OSP.new('example@example.com', 'test1', 2 ** 20)
 		assert_equal(2 ** 20, osp.hashes)
 	end
 	
 	def test_password1
-		osp = TheFox::OSP::OSPDotCom.new('example@example.com', 'test1', 2 ** 10)
+		osp = OSPDotCom.new('example@example.com', 'test1', 2 ** 10)
 		osp.key_derivation
 		
 		assert_equal('TA24hNn0', osp.password('host1', 8, 1, 0))
@@ -62,7 +65,7 @@ class TestOsp < MiniTest::Test
 	# 	#PASSWORD_MIN_SIZE = 8
 	# 	#PASSWORD_MAX_SIZE = 16
 		
-	# 	osp = TheFox::OSP::OSP.new('example@example.com', 'test1', 2 ** 10)
+	# 	osp = OSP.new('example@example.com', 'test1', 2 ** 10)
 	# 	osp.key_derivation
 		
 	# 	assert_equal('cXyE2Dq1', osp.password('host1', 8, 1, 0))
@@ -100,7 +103,7 @@ class TestOsp < MiniTest::Test
 		#PASSWORD_MIN_SIZE = 8
 		#PASSWORD_MAX_SIZE = 32
 		
-		osp = TheFox::OSP::OSP.new('example@example.com', 'test1', 2 ** 10)
+		osp = OSP.new('example@example.com', 'test1', 2 ** 10)
 		osp.key_derivation
 		
 		assert_equal('cXyE2Dq1', osp.password('host1', 8, 1, 0))
@@ -133,4 +136,5 @@ class TestOsp < MiniTest::Test
 		assert_equal('~p/1OI3QRAKGUcUc', osp.password('host2', 16, 3, 2))
 		assert_equal('~p/<OI3QRAKGUcUc', osp.password('host2', 16, 3, 3))
 	end
+	
 end
