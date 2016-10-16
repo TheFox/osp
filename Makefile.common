@@ -1,9 +1,9 @@
 
 # Ruby Common Big
-# 2016-04-09
+# 2016-05-20
 
 MV = mv -nv
-RM = rm -rf
+RM = rm -rfd
 MKDIR = mkdir -p
 CHMOD = chmod
 BUNDLER = bundle
@@ -36,9 +36,7 @@ update:
 
 .PHONY: clean
 clean:
-	$(RM) .bundle
-	$(RM) .setup
-	$(RM) Gemfile.lock
+	$(RM) .bundle .setup Gemfile.lock
 
 .PHONY: release
 release: | releases
