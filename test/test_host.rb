@@ -3,7 +3,6 @@
 require 'minitest/autorun'
 require 'osp'
 
-
 class TestHost < MiniTest::Test
 	
 	include TheFox::OSP

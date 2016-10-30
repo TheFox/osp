@@ -4,7 +4,6 @@ require 'openssl'
 require 'msgpack'
 require 'thefox-ext'
 
-
 module TheFox
 	module OSP
 		
@@ -48,7 +47,7 @@ module TheFox
 					hmac_b64 = Base64.strict_encode64(hmac_p)
 					pw = hmac_b64 if is_ok_pw(hmac_b64)
 					
-					if !@password_callback_method.nil?
+					unless @password_callback_method.nil?
 						@password_callback_method.call(step, hmac_b64)
 					end
 					step += 1
@@ -121,7 +120,7 @@ module TheFox
 				end
 				
 				(self.class::PASSWORD_MIN_SIZE...self.class::PASSWORD_MAX_SIZE).each do |n|
-					if !pw[n].is_valid?
+					unless pw[n].is_valid?
 						return false
 					end
 				end
@@ -145,15 +144,13 @@ module TheFox
 					end
 				end
 				
-				rv = ''
 				if lowers >= caps && lowers >= digits then
-					rv = 'is_lower?'
+					'is_lower?'
 				elsif digits > lowers && digits >= caps
-					rv = 'is_digit?'
+					'is_digit?'
 				else
-					rv = 'is_upper?'
+					'is_upper?'
 				end
-				rv
 			end
 			
 		end

@@ -89,7 +89,9 @@ module TheFox
 			end
 			
 			def write_callback(*o)
-				@write_callback_method.call(*o) if !@write_callback_method.nil?
+				unless @write_callback_method.nil?
+					@write_callback_method.call(*o)
+				end
 			end
 			
 			def write
