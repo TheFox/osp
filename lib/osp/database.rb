@@ -19,7 +19,7 @@ module TheFox
 						'created_at' => DateTime.now.to_s,
 						'updated_at' => DateTime.now.to_s,
 					},
-					'hosts' => {}
+					'hosts' => Hash.new,
 				}
 			end
 			

@@ -58,7 +58,7 @@ module TheFox
 					
 					_b64map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 					
-					indices = []
+					indices = Array.new
 					(0..self.class::PASSWORD_MIN_SIZE).each do |n|
 						c = pw[n]
 						if c.method(sub_method).call
@@ -73,7 +73,7 @@ module TheFox
 					_map_len = _map.length
 					
 					last = 0
-					arr = []
+					arr = Array.new
 					indices.each do |index|
 						arr << pw[last...index]
 						c = pw[index]
