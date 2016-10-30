@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
 	
 	spec.add_development_dependency 'minitest', '~>5.8'
 	spec.add_development_dependency 'simplecov', '~>0.12'
+	spec.add_development_dependency 'simplecov-phpunit', '~>1.0'
 	
 	spec.add_dependency 'highline', '~>1.7'
 	spec.add_dependency 'msgpack', '~>0.7'
