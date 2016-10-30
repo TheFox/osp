@@ -6,7 +6,7 @@ include Makefile.common
 # Email: example@example.com
 # Password: password
 dev:
-	RUBYOPT=-rbundler/setup ruby --debug ./bin/osp -d passwords.osp
+	RUBYOPT=--debug $(BUNDLER) exec ./bin/osp -d passwords.osp
 
 .PHONY: test
 test:

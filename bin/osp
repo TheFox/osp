@@ -2,23 +2,23 @@
 # coding: UTF-8
 
 require 'optparse'
-require 'fileutils'
+require 'pathname'
 require 'highline'
 require 'msgpack'
 require 'osp'
 
 
 @options = {
-	:database_path => "#{Dir.home}/.osp",
-	:database_lock_path => "#{Dir.home}/.osp~lock",
+	:database_path => Pathname.new('.osp').expand_path(Dir.home),
+	:database_lock_path => Pathname.new('.osp~lock').expand_path(Dir.home),
 }
 opts = OptionParser.new do |o|
 	o.banner = 'Usage: osp [options]'
 	o.separator('')
 	
 	o.on('-d', '--database <path>', 'Path to the database file.') do |path|
-		@options[:database_path] = path
-		@options[:database_lock_path] = "#{path}~lock"
+		@options[:database_path] = Pathname.new(path).expand_path
+		@options[:database_lock_path] = Pathname.new("#{@options[:database_path]}~lock").expand_path
 	end
 	
 	o.on_tail('-V', '--version', 'Show version.') do
@@ -33,7 +33,7 @@ opts = OptionParser.new do |o|
 		exit 3
 	end
 end
-args = opts.parse(ARGV)
+opts.parse(ARGV)
 
 
 if !STDIN.tty?
@@ -42,11 +42,11 @@ end
 
 @cli = HighLine.new
 
-puts "OSP - OneShallPass #{TheFox::OSP::VERSION}"
+puts "OSP - OneShallPass v#{TheFox::OSP::VERSION}"
 puts TheFox::OSP::HOMEPAGE
 puts
 
-if File.exist?(@options[:database_lock_path])
+if @options[:database_lock_path].exist?
 	puts "WARNING: lock file exist: '#{@options[:database_lock_path]}'"
 	overwrite = @cli.ask('Overwrite? '){ |q| q.default = 'n' }.downcase
 	if overwrite == 'n'
@@ -55,7 +55,7 @@ if File.exist?(@options[:database_lock_path])
 	end
 end
 File.write(@options[:database_lock_path], 'tmp')
-File.chmod(0600, @options[:database_lock_path])
+@options[:database_lock_path].chmod(0600)
 File.binwrite(@options[:database_lock_path], Process.pid)
 
 puts 'Master Login'
@@ -91,8 +91,8 @@ def database_write_step(step, msg)
 end
 
 def remove_lock
-	if File.exist?(@options[:database_lock_path])
-		FileUtils.rm(@options[:database_lock_path])
+	if @options[:database_lock_path].exist?
+		@options[:database_lock_path].unlink
 	end
 end
 
