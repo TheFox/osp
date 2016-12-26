@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
 	spec.add_development_dependency 'simplecov-phpunit', '~>1.0'
 	
 	spec.add_runtime_dependency 'highline', '~>1.7'
-	spec.add_runtime_dependency 'msgpack', '~>0.7'
+	spec.add_runtime_dependency 'msgpack', '~>1.0'
 	
 	spec.add_runtime_dependency 'thefox-ext', '~>1.2'
 end
