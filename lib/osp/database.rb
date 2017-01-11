@@ -1,5 +1,6 @@
 
 require 'pathname'
+require 'fileutils'
 
 module TheFox
 	module OSP
