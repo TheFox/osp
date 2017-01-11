@@ -56,7 +56,7 @@ module TheFox
 						dk_sha256 = OpenSSL::Digest::SHA256.digest(@osp.dk)
 						iv = Base64.strict_decode64(db_meta['iv'])
 						
-						aes = OpenSSL::Cipher::Cipher.new('AES-256-CBC')
+						aes = OpenSSL::Cipher::AES.new(256, 'CBC')
 						aes.decrypt
 						aes.key = dk_sha256
 						aes.iv = iv
@@ -113,9 +113,9 @@ module TheFox
 					
 					write_callback(1200, 'Setup database encryption.')
 					dk_sha256 = OpenSSL::Digest::SHA256.digest(@osp.dk)
-					iv = OpenSSL::Cipher::Cipher.new('AES-256-CBC').random_iv
+					iv = OpenSSL::Cipher::AES.new(256, 'CBC').random_iv
 					
-					aes = OpenSSL::Cipher::Cipher.new('AES-256-CBC')
+					aes = OpenSSL::Cipher::AES.new(256, 'CBC')
 					aes.encrypt
 					aes.key = dk_sha256
 					aes.iv = iv

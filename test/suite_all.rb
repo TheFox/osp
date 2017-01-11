@@ -10,5 +10,6 @@ if ENV['COVERAGE'] && ENV['COVERAGE'].to_i != 0
 	end
 end
 
+require_relative 'test_dependencies'
 require_relative 'test_host'
 require_relative 'test_osp'
