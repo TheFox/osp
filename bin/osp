@@ -192,9 +192,9 @@ while true
 		format = '%' + hosts_n.to_s.length.to_s + 'd'
 		
 		n = 0
-		@database.hosts.values.each do |host|
+		@database.hosts.values.each do |h|
 			n += 1
-			printf "#{format}. %s\n", n, host.name
+			printf "#{format}. %s\n", n, h.name
 		end
 	when 's'
 		found_hosts = []
@@ -213,7 +213,7 @@ while true
 				host_name = @cli.ask('Search host names: ', String).strip.downcase
 				re = Regexp.new(host_name, Regexp::IGNORECASE)
 				
-				found_hosts = @database.hosts.select{ |name, host| re.match(host.name) }
+				found_hosts = @database.hosts.select{ |name, h| re.match(h.name) }
 				
 				search_actions << 'l'
 			when 'l'
@@ -224,9 +224,9 @@ while true
 					hosts_n = found_hosts.count
 					format = '%' + hosts_n.to_s.length.to_s + 'd'
 					n = 0
-					found_hosts.each do |name, host|
+					found_hosts.each do |name, h|
 						n += 1
-						printf "#{format}. %s\n", n, host.name
+						printf "#{format}. %s\n", n, h.name
 					end
 				else
 					puts 'No hosts found.'
