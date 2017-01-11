@@ -82,10 +82,6 @@ module TheFox
 				end
 			end
 			
-			def password=(v)
-				@password = v
-			end
-			
 			def password
 				generate_password
 				@password
