@@ -1,9 +1,9 @@
-/.bundle/
-.setup
+.env
+/.idea/
 /bin/dev
 CHANGELOG-*.txt
 /coverage/
 Gemfile.lock
-/releases/
 *.osp
 *.osp~*
+/tmp/

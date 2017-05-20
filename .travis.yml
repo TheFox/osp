@@ -11,12 +11,12 @@ before_install:
     - gem install bundler -v '~>1.13'
     - bundler --version
 install:
-    - make
+    - bundler install
     - gem build osp.gemspec
     - gem install osp-*.gem
     - gem list -l osp
 script:
-    - make test
+    - ./bin/test.sh
     - cd
     - which -a osp
     - osp --version

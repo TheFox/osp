@@ -2,7 +2,7 @@ before_script:
     - gem update --system
     - gem install bundler -v '~>1.13'
     - bundler --version
-    - make
+    - bundler install
 
 stages:
     - test
@@ -15,7 +15,7 @@ test_21:
     only:
         - tags
     script:
-        - make test
+        - ./bin/test.sh
 
 test_22:
     image: ruby:2.2
@@ -24,7 +24,7 @@ test_22:
     only:
         - tags
     script:
-        - make test
+        - ./bin/test.sh
 
 test_23:
     image: ruby:2.3
@@ -33,7 +33,7 @@ test_23:
     only:
         - tags
     script:
-        - make test
+        - ./bin/test.sh
 
 release:
     image: ruby:2.4
@@ -44,4 +44,4 @@ release:
     script:
         - mkdir -p ~/.gem
         - 'printf "%s\n:rubygems_api_key: %s" "---" "${RUBYGEMSORG_API_KEY}" > ~/.gem/credentials; chmod 0600 ~/.gem/credentials'
-        - make release
+        - ./bin/release.sh
