@@ -184,6 +184,17 @@ module TheFox
 				end
 			end
 			
+			##
+			# Return all hosts and passwords as CSV string.
+			def csv
+				"HOST,PASSWORD\r\n"
+				@data['hosts']
+					.map{ |id, host|
+						"#{host.name},#{host.password}"
+					}
+					.join("\r\n")
+			end
+			
 		end
 		
 	end
