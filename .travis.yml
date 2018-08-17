@@ -1,22 +1,22 @@
 language: ruby
 rvm:
-    - 2.1
-    - 2.2
-    - 2.3
-    - 2.4.0
-    - ruby-head
+  - 2.1
+  - 2.2
+  - 2.3
+  - 2.4.0
+  - ruby-head
 sudo: required
 before_install:
-    - gem update --system
-    - gem install bundler -v '~>1.13'
-    - bundler --version
+  - gem update --system
+  - gem install bundler -v '~>1.13'
+  - bundler --version
 install:
-    - bundler install
-    - gem build osp.gemspec
-    - gem install osp-*.gem
-    - gem list -l osp
+  - bundler install
+  - gem build osp.gemspec
+  - gem install osp-*.gem
+  - gem list -l osp
 script:
-    - ./bin/test.sh
-    - cd
-    - which -a osp
-    - osp --version
+  - ./bin/test.sh
+  - cd
+  - which -a osp
+  - osp --version

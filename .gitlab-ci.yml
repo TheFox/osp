@@ -1,47 +1,47 @@
 before_script:
-    - gem update --system
-    - gem install bundler -v '~>1.13'
-    - bundler --version
-    - bundler install
+  - gem update --system
+  - gem install bundler -v '~>1.13'
+  - bundler --version
+  - bundler install
 
 stages:
-    - test
-    - release
+  - test
+  - release
 
 test_21:
-    image: ruby:2.1
-    stage: test
-    environment: test
-    only:
-        - tags
-    script:
-        - ./bin/test.sh
+  image: ruby:2.1
+  stage: test
+  environment: test
+  only:
+    - tags
+  script:
+    - ./bin/test.sh
 
 test_22:
-    image: ruby:2.2
-    stage: test
-    environment: test
-    only:
-        - tags
-    script:
-        - ./bin/test.sh
+  image: ruby:2.2
+  stage: test
+  environment: test
+  only:
+    - tags
+  script:
+    - ./bin/test.sh
 
 test_23:
-    image: ruby:2.3
-    stage: test
-    environment: test
-    only:
-        - tags
-    script:
-        - ./bin/test.sh
+  image: ruby:2.3
+  stage: test
+  environment: test
+  only:
+    - tags
+  script:
+    - ./bin/test.sh
 
 release:
-    image: ruby:2.4
-    stage: release
-    environment: gem
-    only:
-        - tags
-    script:
-        - mkdir -p ~/.gem
-        - 'printf "%s\n:rubygems_api_key: %s" "---" "${RUBYGEMSORG_API_KEY}" > ~/.gem/credentials; chmod 0600 ~/.gem/credentials'
-        - ./bin/release.sh
+  image: ruby:2.4
+  stage: release
+  environment: gem
+  only:
+    - tags
+  script:
+    - mkdir -p ~/.gem
+    - 'printf "%s\n:rubygems_api_key: %s" "---" "${RUBYGEMSORG_API_KEY}" > ~/.gem/credentials; chmod 0600 ~/.gem/credentials'
+    - ./bin/release.sh
