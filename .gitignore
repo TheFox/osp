@@ -1,5 +1,6 @@
 .env
 /.idea/
+/.vagrant/
 /bin/dev
 CHANGELOG-*.txt
 /coverage/
