@@ -80,7 +80,9 @@ else
   @osp_class = TheFox::OSP::OSP
 end
 
-printf "Calculating base hash: #{@osp_class::HASHES_N} (#{@osp_class::HASHES_EXP}-bit) - please wait ..."
+print 'Calculating base hash: %d (%d-bit) - please wait ...' % [
+  @osp_class::HASHES_N, @osp_class::HASHES_EXP,
+]
 @osp = @osp_class.new(email, password)
 @osp.key_derivation
 puts ' done'
