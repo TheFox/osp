@@ -36,7 +36,9 @@ module TheFox
           raise ArgumentError, "'host_name' can't be '' or nil"
         end
         
-        key_derivation if @dk.nil?
+        if @dk.nil?
+          key_derivation
+        end
         
         pw = nil
         step = 0
@@ -45,9 +47,11 @@ module TheFox
           data = raw.to_msgpack
           hmac_p = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA512.new, @dk, data)
           hmac_b64 = Base64.strict_encode64(hmac_p)
-          pw = hmac_b64 if is_ok_pw(hmac_b64)
+          if is_ok_pw(hmac_b64)
+            pw = hmac_b64
+          end
           
-          unless @password_callback_method.nil?
+          if not @password_callback_method.nil?
             @password_callback_method.call(step, hmac_b64)
           end
           step += 1

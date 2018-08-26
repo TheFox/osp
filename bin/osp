@@ -74,8 +74,11 @@ puts '   Email: *****'
 puts 'Password: *****'
 puts
 
-@osp_class = TheFox::OSP::OSP
-@osp_class = TheFox::OSP::OSPDev if $DEBUG
+if $DEBUG
+  @osp_class = TheFox::OSP::OSPDev
+else
+  @osp_class = TheFox::OSP::OSP
+end
 
 printf "Calculating base hash: #{@osp_class::HASHES_N} (#{@osp_class::HASHES_EXP}-bit) - please wait ..."
 @osp = @osp_class.new(email, password)
