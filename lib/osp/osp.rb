@@ -40,6 +40,22 @@ module TheFox
           key_derivation
         end
         
+        pw = find_password(host_name, generation)
+        
+        if symbols > 0
+          pw = find_symbols(pw)
+        end
+        
+        pw[0...length]
+      end
+      
+      def password_callback_method=(m)
+        @password_callback_method = m
+      end
+      
+      private
+      
+      def find_password(host_name, generation)
         pw = nil
         step = 0
         while pw.nil?
@@ -56,47 +72,40 @@ module TheFox
           end
           step += 1
         end
+      end
+      
+      def find_symbols(password)
+        sub_method = find_method_to_sub(pw)
         
-        if symbols > 0
-          sub_method = find_method_to_sub(pw)
-          
-          _b64map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
-          
-          indices = Array.new
-          (0..self.class::PASSWORD_MIN_SIZE).each do |n|
-            c = pw[n]
-            if c.method(sub_method).call
-              indices << n
-              if indices.count >= symbols
-                break
-              end
+        _b64map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+        
+        indices = Array.new
+        (0..self.class::PASSWORD_MIN_SIZE).each do |n|
+          c = pw[n]
+          if c.method(sub_method).call
+            indices << n
+            if indices.count >= symbols
+              break
             end
           end
-          
-          _map = "`~!@#$%^&*()-_+={}[]|;:,<>.?/"
-          _map_len = _map.length
-          
-          last = 0
-          arr = Array.new
-          indices.each do |index|
-            arr << pw[last...index]
-            c = pw[index]
-            i = _b64map.index(c)
-            x = _map[i % _map_len]
-            arr << x
-            last = index + 1
-          end
-          arr << pw[last..-1]
-          pw = arr.join
         end
-        pw[0...length]
+        
+        _map = "`~!@#$%^&*()-_+={}[]|;:,<>.?/"
+        _map_len = _map.length
+        
+        last = 0
+        arr = Array.new
+        indices.each do |index|
+          arr << pw[last...index]
+          c = pw[index]
+          i = _b64map.index(c)
+          x = _map[i % _map_len]
+          arr << x
+          last = index + 1
+        end
+        arr << pw[last..-1]
+        pw = arr.join
       end
-      
-      def password_callback_method=(m)
-        @password_callback_method = m
-      end
-      
-      private
       
       def is_ok_pw(pw)
         caps = 0
