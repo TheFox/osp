@@ -31,7 +31,7 @@ module TheFox
         @dk = OpenSSL::PKCS5.pbkdf2_hmac(@password, @email, @hashes, 64, OpenSSL::Digest::SHA512.new)
       end
       
-      def password(host_name, length = 16, generation = 1, symbols = self.class::SYMBOLS)
+      def password(host_name, length = 16, generation = 1, symbols_n = self.class::SYMBOLS)
         if host_name.nil? || host_name == '' || !host_name
           raise ArgumentError, "'host_name' can't be '' or nil"
         end
@@ -40,13 +40,13 @@ module TheFox
           key_derivation
         end
         
-        pw = find_password(host_name, generation)
+        password_s = find_password(host_name, generation)
         
-        if symbols > 0
-          pw = find_symbols(pw)
+        if symbols_n > 0
+          password_s = find_symbols(password_s, symbols_n)
         end
         
-        pw[0...length]
+        password_s[0...length]
       end
       
       def password_callback_method=(m)
@@ -56,15 +56,15 @@ module TheFox
       private
       
       def find_password(host_name, generation)
-        pw = nil
+        password_s = nil
         step = 0
-        while pw.nil?
+        while password_s.nil?
           raw = [self.class::ID, @email, host_name, generation, step]
           data = raw.to_msgpack
           hmac_p = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA512.new, @dk, data)
           hmac_b64 = Base64.strict_encode64(hmac_p)
           if is_ok_pw(hmac_b64)
-            pw = hmac_b64
+            password_s = hmac_b64
           end
           
           if not @password_callback_method.nil?
@@ -72,19 +72,21 @@ module TheFox
           end
           step += 1
         end
+        
+        password_s
       end
       
-      def find_symbols(password)
-        sub_method = find_method_to_sub(pw)
+      def find_symbols(password_s, symbols_n)
+        sub_method = find_method_to_sub(password_s)
         
         _b64map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
         
         indices = Array.new
         (0..self.class::PASSWORD_MIN_SIZE).each do |n|
-          c = pw[n]
+          c = password_s[n]
           if c.method(sub_method).call
             indices << n
-            if indices.count >= symbols
+            if indices.count >= symbols_n
               break
             end
           end
@@ -96,15 +98,16 @@ module TheFox
         last = 0
         arr = Array.new
         indices.each do |index|
-          arr << pw[last...index]
-          c = pw[index]
+          arr << password_s[last...index]
+          c = password_s[index]
           i = _b64map.index(c)
           x = _map[i % _map_len]
           arr << x
           last = index + 1
         end
-        arr << pw[last..-1]
-        pw = arr.join
+        arr << password_s[last..-1]
+        
+        arr.join
       end
       
       def is_ok_pw(pw)
