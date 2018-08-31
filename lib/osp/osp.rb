@@ -63,7 +63,7 @@ module TheFox
           data = raw.to_msgpack
           hmac_p = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA512.new, @dk, data)
           hmac_b64 = Base64.strict_encode64(hmac_p)
-          if is_ok_pw(hmac_b64)
+          if is_password_ok(hmac_b64)
             password_s = hmac_b64
           end
           
@@ -110,13 +110,13 @@ module TheFox
         arr.join
       end
       
-      def is_ok_pw(pw)
+      def is_password_ok(password_s)
         caps = 0
         lowers = 0
         digits = 0
         
         (0...self.class::PASSWORD_MIN_SIZE).each do |n|
-          c = pw[n]
+          c = password_s[n]
           
           if c.is_digit?
             digits += 1
@@ -136,7 +136,7 @@ module TheFox
         end
         
         (self.class::PASSWORD_MIN_SIZE...self.class::PASSWORD_MAX_SIZE).each do |n|
-          if not pw[n].is_valid?
+          if not password_s[n].is_valid?
             return false
           end
         end
@@ -144,13 +144,13 @@ module TheFox
         true
       end
       
-      def find_method_to_sub(pw)
+      def find_method_to_sub(password_s)
         caps = 0
         lowers = 0
         digits = 0
         
         (0...self.class::PASSWORD_MIN_SIZE).each do |n|
-          c = pw[n]
+          c = password_s[n]
           if c.is_digit?
             digits += 1
           elsif c.is_upper?
