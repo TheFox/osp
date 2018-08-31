@@ -136,7 +136,7 @@ module TheFox
         end
         
         (self.class::PASSWORD_MIN_SIZE...self.class::PASSWORD_MAX_SIZE).each do |n|
-          unless pw[n].is_valid?
+          if not pw[n].is_valid?
             return false
           end
         end
