@@ -116,6 +116,10 @@ module TheFox
         arr.join
       end
       
+      def bad(x)
+        x == 0 || x > 5
+      end
+      
       def is_password_ok(password_s)
         caps = 0
         lowers = 0
@@ -135,9 +139,7 @@ module TheFox
           end
         end
         
-        bad = lambda { |x| x == 0 || x > 5 }
-        
-        if bad.call(caps) || bad.call(lowers) || bad.call(digits)
+        if bad(caps) || bad(lowers) || bad(digits)
           return false
         end
         
