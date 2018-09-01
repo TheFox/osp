@@ -32,6 +32,12 @@ module TheFox
       end
       
       def password(host_name, length = 16, generation = 1, symbols_n = self.class::SYMBOLS)
+        if length < PASSWORD_MIN_SIZE
+          raise RangeError, 'Invalid password length: %d. Minimum length is %d.' % [length, PASSWORD_MIN_SIZE]
+        end
+        if length > PASSWORD_MAX_SIZE
+          raise RangeError, 'Invalid password length: %d. Maximum length is %d.' % [length, PASSWORD_MAX_SIZE]
+        end
         if host_name.nil? || host_name == '' || !host_name
           raise ArgumentError, "'host_name' can't be '' or nil"
         end
