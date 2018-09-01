@@ -127,6 +127,7 @@ module TheFox
         lowers = 0
         digits = 0
         
+        # Get the entropy for the minium password length.
         (0...self.class::PASSWORD_MIN_SIZE).each do |n|
           c = password_s[n]
           
@@ -141,10 +142,14 @@ module TheFox
           end
         end
         
+        # Check minimum entropy.
         if bad(caps) || bad(lowers) || bad(digits)
           return false
         end
         
+        # Also check minimum to maximum password size for later use.
+        # Passwords can be extended later to maximum size without changing
+        # the first characters.
         (self.class::PASSWORD_MIN_SIZE...self.class::PASSWORD_MAX_SIZE).each do |n|
           if not password_s[n].is_valid?
             return false
