@@ -18,6 +18,7 @@ module TheFox
       
       attr_accessor :dk
       attr_accessor :hashes
+      attr_reader :steps
       
       def initialize(email, password, hashes = self.class::HASHES_N)
         @email = email
@@ -25,6 +26,7 @@ module TheFox
         @hashes = hashes
         @dk = nil
         @password_callback_method = nil
+        @steps = 0
       end
       
       def key_derivation
@@ -63,9 +65,9 @@ module TheFox
       
       def find_password(host_name, generation)
         password_s = nil
-        step = 0
+        @steps = 0
         while password_s.nil?
-          raw = [self.class::ID, @email, host_name, generation, step]
+          raw = [self.class::ID, @email, host_name, generation, @steps]
           data = raw.to_msgpack
           hmac_p = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA512.new, @dk, data)
           hmac_b64 = Base64.strict_encode64(hmac_p)
@@ -74,9 +76,9 @@ module TheFox
           end
           
           if not @password_callback_method.nil?
-            @password_callback_method.call(step, hmac_b64)
+            @password_callback_method.call(@steps, hmac_b64)
           end
-          step += 1
+          @steps += 1
         end
         
         password_s
