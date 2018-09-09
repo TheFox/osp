@@ -61,10 +61,18 @@ File.binwrite(@options[:database_lock_path], Process.pid)
 puts 'Master Login'
 if $DEBUG
   email = 'example@example.com'
-  password = 'password'
+  password1 = 'password'
+  password2 = 'password'
 else
   email    = @cli.ask('   Email: ')
-  password = @cli.ask('Password: '){ |q| q.echo = '*' }
+  password1 = @cli.ask('Password: '){ |q| q.echo = '*' }
+  password2 = @cli.ask(' Confirm: '){ |q| q.echo = '*' }
+  
+  if password1 != password2
+    remove_lock
+    puts 'Passwords do not match.'
+    exit 1
+  end
 end
 
 Console.cursor_jump_to_column
@@ -83,7 +91,7 @@ end
 print 'Calculating base hash: %d (%d-bit) - please wait ...' % [
   @osp_class::HASHES_N, @osp_class::HASHES_EXP,
 ]
-@osp = @osp_class.new(email, password)
+@osp = @osp_class.new(email, password1)
 @osp.key_derivation
 puts ' done'
 
