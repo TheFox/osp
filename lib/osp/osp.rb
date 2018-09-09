@@ -31,6 +31,9 @@ module TheFox
       
       def key_derivation
         @dk = OpenSSL::PKCS5.pbkdf2_hmac(@password, @email, @hashes, 64, OpenSSL::Digest::SHA512.new)
+        # puts
+        # puts 'DK: ' + Base64.strict_encode64(@dk)
+        # puts
       end
       
       def password(host_name, length = 16, generation = 1, symbols_n = self.class::SYMBOLS)
@@ -71,6 +74,7 @@ module TheFox
           data = raw.to_msgpack
           hmac_p = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA512.new, @dk, data)
           hmac_b64 = Base64.strict_encode64(hmac_p)
+          # puts 'b64 %s' % [hmac_b64]
           if is_password_ok(hmac_b64)
             password_s = hmac_b64
           end
