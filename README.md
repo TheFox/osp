@@ -20,7 +20,6 @@ $ gem 'osp', '~>0.6'
 - [Usage Video](https://asciinema.org/a/32521)
 - [Blog Post about OSP](http://blog.fox21.at/2015/12/19/one-shall-pass-for-command-line.html)
 - [OSP Gem](https://rubygems.org/gems/osp)
-- [Travis CI Repository](https://travis-ci.org/TheFox/osp)
 
 ## Weblinks
 
