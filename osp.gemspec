@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{One Shall Pass}
   spec.description   = %q{Password Manager: One Shall Pass for Command Line.}
   spec.homepage      = TheFox::OSP::HOMEPAGE
-  spec.license       = 'GPL-3.0'
+  spec.license       = 'MIT'
   
   spec.files         = `git ls-files -z`.split("\x0").reject{ |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = 'bin'
