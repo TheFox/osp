@@ -5,14 +5,14 @@
 The preferred method of installation is via RubyGems.org:  
 <https://rubygems.org/gems/osp>
 
-```sh
-$ gem install osp
+```bash
+gem install osp
 ```
 
 or via `Gemfile`:
 
-```sh
-$ gem 'osp', '~>0.6'
+```ruby
+gem 'osp', '~>0.6'
 ```
 
 ## Project Links
